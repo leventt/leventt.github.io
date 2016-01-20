@@ -87,9 +87,9 @@
             <div class="hiddenlogo", id="logo">eskizler // sketches</div>
         </div>
         <div class="hiddencontent", id="nav">
-        <a href="http://leventtasel.com/">cargo</a> / <a href="https://github.com/leventt">github</a> / <a href="https://soundcloud.com/evhali">soundcloud</a></div>
+        <a href="/musikiKafalar.html">musikiKafalar. [beta]</a><br><a href="https://github.com/leventt/leventt.github.io">github</a>
         <div class="hiddencontent", id="content">
-        biseylergelicekburaya...<br>// worksareinprogress...
+        leventtasel.com
         </div>
         <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>
@@ -261,7 +261,7 @@
             var bsize = 200;
             var pointSize = bsize * 0.035;
             var rotateY = new THREE.Matrix4().makeRotationY( 0.01 );
-            uniforms = {
+            var uniforms = {
 
                 time:    { type: "f", value: 0.0 },
                 color:   { type: "c", value: new THREE.Color( 0xffffff ) },
@@ -284,8 +284,8 @@
                 var k = 0;
                 var pCount = 5000;
 
-          			var positions = new Float32Array( pCount * 3 );
-          			var sizes = new Float32Array( pCount );
+                var positions = new Float32Array( pCount * 3 );
+                var sizes = new Float32Array( pCount );
 
                 for( var j = 0; j < 1; j++ ) {
                     for( var i = 0; i < pCount; i++ ) {
