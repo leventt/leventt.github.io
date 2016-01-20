@@ -221,8 +221,8 @@
                         controls.enablePan = false;
                         controls.minPolarAngle = Math.PI / 360. * 190.;
                         controls.maxPolarAngle = Math.PI / 360. * 190.;
-                        controls.minAzimuthAngle = Math.PI / 360. * -45.;
-                        controls.maxAzimuthAngle = Math.PI / 360. * 45.;
+                        controls.minAzimuthAngle = Math.PI / 360. * -60.;
+                        controls.maxAzimuthAngle = Math.PI / 360. * 60.;
 
                         uniformsHeadshot[ 'time' ].value = .00025 * ( Date.now() - start );
 
@@ -259,7 +259,7 @@
 
                 requestAnimationFrame(animate);
 
-                controls.constraint.rotateLeft((controls.getAzimuthalAngle() - Math.PI / -360. * ((tCursor.value/musiki.duration * 90.) - 45.)));
+                controls.constraint.rotateLeft((controls.getAzimuthalAngle() - Math.PI / -360. * ((tCursor.value/musiki.duration * 120.) - 60.)));
                 controls.update();
 
                 render();
