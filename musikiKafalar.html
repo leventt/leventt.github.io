@@ -230,9 +230,11 @@
                             document.getElementById( 'loading' ).innerHTML = "";
 
                             musiki = this;
-                            tCursor = T("param", {value:0., ar:true}).on("ended", function() {
-                                tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
-                            }).linTo(musiki.duration, musiki.duration);
+                            tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
+                                tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
+                                    tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
+                                }).linTo(musiki.duration, musiki.duration);
+                            }).sinTo(0., musiki.duration/4.);
                             musiki.set({currentTime:tCursor}).play();
 
                             animate();
