@@ -19,6 +19,9 @@ div.hiddenlogo {
 div.hiddencontent {
     display: none;
 }
+div.hiddeninfo {
+    display: none;
+}
 a {
     font-family: josefin;
 }
