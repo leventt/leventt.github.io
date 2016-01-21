@@ -1,5 +1,5 @@
-@font-face { font-family: abastina; src: url('../external/fonts/abastina.otf'); }
-@font-face { font-family: josefin; src: url('../external/fonts/josefin.ttf'); }
+@font-face { font-family: abastina; src: url('external/fonts/abastina.otf'); }
+@font-face { font-family: josefin; src: url('external/fonts/josefin.ttf'); }
 #logo {
     font-family: abastina;
     color: #6B6B6B;
