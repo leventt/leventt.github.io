@@ -50,7 +50,7 @@ body {
 }
 #content {
     font-family: josefin;
-    width: 512px ;
+    width: 100%;
     margin-left: auto ;
     margin-right: auto ;
     margin-top: 30px;
