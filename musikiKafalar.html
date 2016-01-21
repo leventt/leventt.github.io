@@ -193,10 +193,10 @@
             $("body").on('touchend mouseup', function(event) {
                 var pageX;
                 switch(event.type) {
-                    case "touchstart":
+                    case "touchend":
                         pageX = event.touches[0].pageX;
                         break;
-                    case "mousedown":
+                    case "mouseup":
                         pageX = event.pageX;
                         break;
                     default:
