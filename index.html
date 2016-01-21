@@ -276,6 +276,7 @@
 
                 renderer = Detector.webgl ? new THREE.WebGLRenderer( { alpha: true } ) : new THREE.CanvasRenderer( { alpha: true } );
                 renderer.setSize( bsize, bsize );
+                renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
                 container.appendChild( renderer.domElement );
 
                 //
