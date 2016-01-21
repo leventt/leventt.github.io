@@ -175,11 +175,35 @@
             // https://gist.github.com/kujon/2781489
             (function(){Math.clamp=function(a,b,c){return Math.max(b,Math.min(c,a));}})();
 
-            document.body.onmousedown = function(event) { 
-                dragX = event.pageX;
-            }
-            document.body.onmouseup = function(event) {
-                var dragRatio = (event.pageX - dragX)/$(document).width();
+            $("body").on('touchstart mousedown', function(event) {
+                var pageX;
+                switch(event.type) {
+                    case "touchstart":
+                        pageX = event.touches[0].pageX;
+                        break;
+                    case "mousedown":
+                        pageX = event.pageX;
+                        break;
+                    default:
+                        return;
+                }
+
+                dragX = pageX;
+            });
+            $("body").on('touchend mouseup', function(event) {
+                var pageX;
+                switch(event.type) {
+                    case "touchstart":
+                        pageX = event.touches[0].pageX;
+                        break;
+                    case "mousedown":
+                        pageX = event.pageX;
+                        break;
+                    default:
+                        return;
+                }
+
+                var dragRatio = (pageX - dragX)/$(document).width();
                 musiki.pause();
                 tCursor.pause();
                 tCursor = T("param", {value:tCursor.value, ar:true}).on("ended", function() {
@@ -188,7 +212,7 @@
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
-            }
+            });
 
             function replay() {
                 tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
