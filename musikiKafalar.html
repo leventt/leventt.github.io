@@ -208,7 +208,7 @@
                 tCursor.pause();
                 tCursor = T("param", {value:tCursor.value, ar:true}).on("ended", function() {
                     musiki.pause();
-                }).sinTo(Math.clamp(tCursor.value + musiki.duration/(dragRatio), 0., musiki.duration), musiki.duration/6.);
+                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), musiki.duration/6.);
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
