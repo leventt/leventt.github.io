@@ -182,6 +182,7 @@
             (function(){Math.clamp=function(a,b,c){return Math.max(b,Math.min(c,a));}})();
 
             $("body").on('touchstart mousedown', function(event) {
+                document.body.style.cursor = 'col-resize';
                 var pageX;
                 switch(event.type) {
                     case "touchstart":
@@ -198,6 +199,7 @@
                 musiki.pause();
             });
             $("body").on('touchend mouseup', function(event) {
+                document.body.style.cursor = 'default';
                 var pageX;
                 switch(event.type) {
                     case "touchend":
@@ -215,7 +217,7 @@
                 tCursor.pause();
                 tCursor = T("param", {value:tCursor.value, ar:true}).on("ended", function() {
                     musiki.pause();
-                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), musiki.duration/6.);
+                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), musiki.duration*Math.abs(dragRatio));
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
