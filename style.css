@@ -7,9 +7,9 @@
     text-align: center;
 }
 #logotext {
-    width: 200px ;
-    margin-left: auto ;
-    margin-right: auto ;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 30px;
     margin-bottom: 100px;
 }
@@ -51,23 +51,23 @@ body {
 #content {
     font-family: josefin;
     width: 100%;
-    margin-left: auto ;
-    margin-right: auto ;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 30px;
     text-align: center;
 }
 #nav {
     font-family: josefin;
     color: #6A6A6A;
-    margin-left: auto ;
-    margin-right: auto ;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 30px;
     text-align: center;
 }
 #footer {
-    width: 100% ;
-    margin-left: auto ;
-    margin-right: auto ;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 30px;
     text-align: center;
 }
@@ -79,11 +79,19 @@ body {
     display: inline-block;
     font-family: josefin;
     width: 100%;
-    margin-left: auto ;
-    margin-right: auto ;
+    margin-left: auto;
+    margin-right: auto;
     text-align: center;
 }
 #canvas {
     display: inline-block;
     font-family: josefin;
+}
+blockquote {
+    border-left: 0.5em solid #6A6A6A;
+	border-right: 0.5em solid #6A6A6A;
+    width: 333px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
 }

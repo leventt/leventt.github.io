@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>leventt.github.io</title>
+        <title>olduğuKadar. ♫</title>
         <meta name="theme-color" content="#888888">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -11,22 +11,33 @@
 
     <body>
         <div id="logotext">
-            <div id="tjslogo"></div>
-            <div class="hiddenlogo", id="logo">eskizler // sketches</div>
+            <div class="hiddenlogo", id="logo">olduguKadar.</div>
         </div>
+        <div id="outer"><div id="canvas"><div id="loading">loading...</div></div></div>
         <div class="hiddencontent", id="nav">
-        <a href="/musikiKafalar.html">musikiKafalar. ♫</a>
+        <a onclick="rephrase()" href="javascript:void(0);" id="playback1">rastgele // rephrase</a>
         <br>
-        <a href="/olduguKadar.html">olduğuKadar. ♫</a>
+        <a onclick="stop()" href="javascript:void(0);" id="playback2">dur // stop</a>
         <br>
-        <br>
-        <a href="https://github.com/leventt/leventt.github.io">src</a>
-        <br>
-        <a href="http://leventtasel.com/">cargo</a>
+        <a href="/">geri // back</a></div>
         <div class="hiddencontent", id="content">
+        [♫]
+        </div>
+        <div class="hiddeninfo", id="content">
+        </div>
         <script src="external/js/jquery-1.12.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $("div.hiddenlogo").fadeIn(1000).removeClass("hiddenlogo");
+                $("div.hiddencontent").fadeIn(2000).removeClass("hiddencontent");
+                $("div.hiddeninfo").fadeIn(3000).removeClass("hiddencontent");
+            });
+        </script>
         <script src="external/js/three.min.js"></script>
         <script src="external/js/Detector.js"></script>
+        <script src="external/js/OrbitControls.js"></script>
+        <script src="external/js/OBJLoader.js"></script>
+        <script src="external/js/timbre.js"></script>
         <script type="x-shader/x-vertex" id="vertexShader">
             uniform float time;
             attribute float size;
@@ -143,12 +154,11 @@
                 vec3 N = normalize(position);
                 float radius = length(position);
 
-                float noise = 1000.0 *  -0.10 * turbulence( 0.5 * N + time );
-                float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
-                float displacement = - noise + b + time * 75.;
-                displacement = clamp(displacement, 0., 15.);
+                float noise = turbulence( time * N );
+                float b = pnoise( position * vec3( time ), vec3( 0.01 ) );
+                float displacement = noise + b;
 
-                vec3 newPosition = position + N * displacement;
+                vec3 newPosition = position + 16. * N * displacement;
 
                 fN = N;
                 fV = -vec3(modelViewMatrix*vec4(newPosition, 1.0));
@@ -167,7 +177,7 @@
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1,1,1,1),vec4(0.5,0.5,0.5,1),ratio) * texture2D( texture, gl_PointCoord );;
+                gl_FragColor = mix(vec4(1),vec4(0.75,0.75,0.75,1),ratio) * texture2D( texture, gl_PointCoord );;
                 if ( gl_FragColor.a < 0.85 ) discard;
             }
         </script>
@@ -175,9 +185,14 @@
             if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
             var renderer, scene, camera;
+            var musiki, tCursor;
+            var speech, tCursorSpeech;
+            var speechPhrase = "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░";
+            var dragX;
+
             var bsize = 200;
-            var pointSize = bsize * 0.035;
-            var rotateY = new THREE.Matrix4().makeRotationY( 0.01 );
+            var pointSize = bsize * 0.045;
+            var pcSphere;
             var uniforms = {
 
                 time:    { type: "f", value: 0.0 },
@@ -186,24 +201,14 @@
 
             };
             var start = Date.now();
+            var phrase;
+            var phraseCursor = 0;
+            var pulseMaterial;
+            var speechMin = 0.;
+            var speechMax = 1.;
+            var speechActive = false;
 
-            var loader = new THREE.TextureLoader();
-            loader.load( 'res/particle.png', function (texture) {
-                uniforms.texture.value = texture;
-                init();
-
-                render();
-
-                $("body").on('touchstart mousedown', function(event) {
-                    start = Date.now();
-                    uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
-                    animate();
-                    $(document).ready(function () {
-                        $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
-                        $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
-                    });
-                });
-            });
+            init();
 
             function generateDomeCloud() {
 
@@ -218,7 +223,7 @@
                 for( var j = 0; j < 1; j++ ) {
                     for( var i = 0; i < pCount; i++ ) {
 
-                        var R = 150 - (16 * (j));
+                        var R = 160 - (16 * (j));
 
                         var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
                         var GA = PHI * Math.PI * 2;           // golden angle
@@ -261,53 +266,187 @@
 
             function init() {
 
-                uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
+                var loader = new THREE.TextureLoader();
+                loader.load( 'res/particle.png', function (texture) {
+                    uniforms.texture.value = texture;
+                    uniforms[ 'time' ].value = 0.0025 * ( Date.now() - start );
 
-                container = document.getElementById( 'tjslogo' );
+                    container = document.getElementById( 'canvas' );
 
-                scene = new THREE.Scene();
+                    scene = new THREE.Scene();
 
-                camera = new THREE.PerspectiveCamera( 35, 1.0, 1, 10000 );
-                camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0,0,600 ) );
-                // camera.applyMatrix( new THREE.Matrix4().makeRotationX( -0.5 ) );
+                    camera = new THREE.PerspectiveCamera( 35, 1.0, 1, 10000 );
+                    camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0,0,600 ) );
 
-                //
+                    //
 
-                var pcSphere = generateDomeCloud();
-                scene.add( pcSphere );
+                    pcSphere = generateDomeCloud();
+                    scene.add( pcSphere );
 
-                var geometry = new THREE.SphereGeometry( 155, 32, 32 );
-                var material = new THREE.MeshBasicMaterial( {color: 0x888888} );
-                var sphere = new THREE.Mesh( geometry, material );
-                scene.add( sphere );
+                    var geometry = new THREE.SphereGeometry( 70, 32, 32 );
+                    pulseMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
+                    var sphere = new THREE.Mesh( geometry, pulseMaterial );
+                    sphere.position.z = 100.;
+                    pcSphere.add(sphere);
 
-                //
+                    var geometry = new THREE.SphereGeometry( 20, 32, 32 );
+                    var material = new THREE.MeshBasicMaterial( {color: 0x000000} );
+                    var sphere = new THREE.Mesh( geometry, material );
+                    sphere.position.z = 160.;
+                    pcSphere.add(sphere);
 
-                renderer = Detector.webgl ? new THREE.WebGLRenderer( { alpha: true } ) : new THREE.CanvasRenderer( { alpha: true } );
-                renderer.setSize( bsize, bsize );
-                renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
-                container.appendChild( renderer.domElement );
 
-                //
 
+                    renderer = Detector.webgl ? new THREE.WebGLRenderer( { alpha: true } ) : new THREE.CanvasRenderer( { alpha: true } );
+                    renderer.setSize( bsize, bsize );
+                    renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
+                    container.appendChild( renderer.domElement );
+
+                    //
+
+                    T("audio").load("res/speech/eightbase.wav", function() {
+                        document.getElementById( 'loading' ).innerHTML = "";
+
+                        musiki = this;
+
+                        T("audio").load("res/speech/eightspeech.wav", function() {
+                            document.getElementById( 'loading' ).innerHTML = "";
+
+                            speech = this;
+
+                            tCursor = T("param", {value:0., ar:true}).on("ended", function() {
+                                replay();
+                            }).linTo(musiki.duration, musiki.duration);
+                            musiki.set({currentTime:tCursor}).play();
+
+                            animate();
+                        });
+                    });
+                });
+            }
+
+            // http://jsdo.it/0i0/npV8
+            function HueToRgb(m1, m2, hue) {
+                hue < 0 ? hue += 1 :
+                hue > 1 ? hue -= 1:
+                false;
+
+                var v = 6 * hue < 1 ? m1 + (m2 - m1) * hue * 6 :
+                    2 * hue < 1 ? m2 :
+                    3 * hue < 2 ? m1 + (m2 - m1) * (2/3 - hue) * 6 :
+                    m1;
+
+                return 255 * v;
+            }
+            function hslToHex(h, s, l){
+                var rgb,r,g,b,m1, m2, hue;
+
+                s /=100;
+                l /= 100;
+
+                if (s == 0) r = g = b = (l * 255);
+                else {
+                m2 = l <= 0.5 ? l * (s + 1):
+                l + s - l * s;
+                m1 = l * 2 - m2;
+                hue = h / 360;
+                r = HueToRgb(m1, m2, hue + 1/3);
+                g = HueToRgb(m1, m2, hue);
+                b = HueToRgb(m1, m2, hue - 1/3);
+                }
+
+                rgb = b | (g << 8) | (r << 16);
+
+                return rgb;
             }
 
             function animate() {
 
-                requestAnimationFrame( animate );
+                requestAnimationFrame(animate);
 
-                uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
+                uniforms[ 'time' ].value = 0.0025 * ( Date.now() - start );
+                if (speechActive) {
+                    var ratio = (tCursorSpeech - speechMin) / (speechMax - speechMin);
+                    pulseMaterial.color.setHex(hslToHex(350+50*ratio, 100, 50));
+                } else {
+                    pulseMaterial.color.setHex(hslToHex(400, 100, 50));
+                }
 
                 render();
+
+                document.getElementsByClassName("hiddeninfo")[0].innerHTML = "["+speechPhrase.substring(0, phraseCursor)+"]";
 
             }
 
             function render() {
 
-                // camera.applyMatrix( rotateY );
                 camera.updateMatrixWorld();
                 renderer.render( scene, camera );
 
+            }
+
+            function choice(arr) {
+                randInt = Math.floor(Math.random() * arr.length);
+                return arr[randInt];
+            }
+
+            // http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript#6274381
+            function shuffle(o){
+                for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+                return o;
+            }
+
+            function speechSeq() {
+                phraseCursor = phraseCursor % phrase.length;
+                var chunkIndex = phrase[phraseCursor];
+
+                speechMin = chunkIndex * (speech.duration/phrase.length);
+                speechMax = (chunkIndex+1) * (speech.duration/phrase.length);
+
+                tCursorSpeech = T("param", {value:speechMin, ar:true}).on("ended", function() {
+                    speechSeq();
+                }).sinTo(speechMax, (speech.duration/phrase.length));
+                speech.set({currentTime:tCursorSpeech}).play();
+
+                pcSphere.rotation.x = (Math.random()-0.5)*2. * Math.PI/180. * 10;
+                pcSphere.rotation.y = (Math.random()-0.5)*2. * Math.PI/180. * 10;
+
+                animate();
+                phraseCursor++;
+            }
+
+            function replay() {
+                tCursor = T("param", {value:0., ar:true}).on("ended", function() {
+                    replay();
+                }).linTo(musiki.duration, musiki.duration);
+                musiki.set({currentTime:tCursor}).play();
+            }
+
+            function stop() {
+                tCursor = T("param", {value:tCursor, ar:true}).linTo(musiki.duration, 0);
+                musiki.set({currentTime:tCursor}).play();
+
+                if (tCursorSpeech) {
+                    tCursorSpeech = T("param", {value:tCursorSpeech, ar:true}).linTo(speech.duration, 0);
+                    speech.set({currentTime:tCursorSpeech}).play();
+                }
+
+                pcSphere.rotation.x = 0.;
+                pcSphere.rotation.y = 0.;
+                speechActive = false;
+            }
+
+            function rephrase() {
+                tCursor = T("param", {value:0., ar:true}).on("ended", function() {
+                    replay();
+                }).linTo(musiki.duration, musiki.duration);
+                musiki.set({currentTime:tCursor}).play();
+
+                phrase = shuffle([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]);
+                speechActive = true;
+                phraseCursor = 0;
+
+                speechSeq();
             }
 
         </script>
