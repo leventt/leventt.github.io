@@ -194,7 +194,7 @@
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1.85),vec4(1.5,1.5,1.5,1),ratio*0.85) * texture2D( texture, gl_PointCoord );;
+                gl_FragColor = mix(vec4(1., 0.5, 1.75, 1.),vec4(0.75,0.75,0.75,1),ratio*0.85) * texture2D( texture, gl_PointCoord );;
                 if ( gl_FragColor.a < 0.85 ) discard;
             }
         </script>
