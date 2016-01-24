@@ -154,16 +154,33 @@
                 vec3 N = normalize(position);
                 float radius = length(position);
 
-                float noise = turbulence( time * N );
-                float b = pnoise( position * vec3( time ), vec3( 0.01 ) );
-                float displacement = noise + b;
+                float noise = turbulence( 8. * time * N );
+                float b = pnoise( position, vec3( 0.1 ) );
+                float displacement = 32. * noise + b;
 
-                vec3 newPosition = position + 16. * N * displacement;
+                vec3 newPosition = position + N * displacement;
 
                 fN = N;
                 fV = -vec3(modelViewMatrix*vec4(newPosition, 1.0));
 
                 vec4 mvPosition = modelViewMatrix * vec4( newPosition, 1.0 );
+                gl_PointSize = size;
+                gl_Position = projectionMatrix * mvPosition;
+
+            }
+        </script>
+        <script type="x-shader/x-vertex" id="vs2">
+            uniform float time;
+            attribute float size;
+            varying vec3 fN;
+            varying vec3 fV;
+
+            void main() {
+
+                vec3 N = normalize(position);
+                fN = N;
+                fV = -vec3(modelViewMatrix*vec4(position, 1.0));
+                vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
                 gl_PointSize = size;
                 gl_Position = projectionMatrix * mvPosition;
 
@@ -177,8 +194,20 @@
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1),vec4(0.75,0.75,0.75,1),ratio) * texture2D( texture, gl_PointCoord );;
+                gl_FragColor = mix(vec4(1.85),vec4(1.5,1.5,1.5,1),ratio*0.85) * texture2D( texture, gl_PointCoord );;
                 if ( gl_FragColor.a < 0.85 ) discard;
+            }
+        </script>
+        <script type="x-shader/x-vertex" id="fs2">
+            uniform sampler2D texture;
+            varying vec3 fN;
+            varying vec3 fV;
+
+            void main() {
+                float ratio = dot(normalize(fV),normalize(fN));
+
+                gl_FragColor = mix(vec4(1.75, 2.1, 0.0, 1.),vec4(0.5,0.85,0.5,1),ratio) * texture2D( texture, gl_PointCoord );;
+                if ( gl_FragColor.a < 0.75 ) discard;
             }
         </script>
         <script>
@@ -191,7 +220,6 @@
             var dragX;
 
             var bsize = 200;
-            var pointSize = bsize * 0.045;
             var pcSphere;
             var uniforms = {
 
@@ -207,15 +235,16 @@
             var speechMin = 0.;
             var speechMax = 1.;
             var speechActive = false;
+            var stopTime = false;
+            var fft, pulseSphere;
 
             init();
 
-            function generateDomeCloud() {
+            function generateDomeCloud(radius, pCount, pointSize, vShaderStr, fShaderStr) {
 
                 var geometry = new THREE.BufferGeometry();
 
                 var k = 0;
-                var pCount = 5000;
 
                 var positions = new Float32Array( pCount * 3 );
                 var sizes = new Float32Array( pCount );
@@ -223,7 +252,7 @@
                 for( var j = 0; j < 1; j++ ) {
                     for( var i = 0; i < pCount; i++ ) {
 
-                        var R = 160 - (16 * (j));
+                        var R = radius - (16 * (j));
 
                         var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
                         var GA = PHI * Math.PI * 2;           // golden angle
@@ -255,8 +284,8 @@
 
                 var material = new THREE.ShaderMaterial( {
                     uniforms: uniforms,
-                    vertexShader: document.getElementById( 'vertexShader' ).textContent,
-                    fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+                    vertexShader: document.getElementById( vShaderStr ).textContent,
+                    fragmentShader: document.getElementById( fShaderStr ).textContent,
                 } );
                 var pointcloud = new THREE.Points( geometry, material );
 
@@ -280,19 +309,21 @@
 
                     //
 
-                    pcSphere = generateDomeCloud();
+                    pcSphere = generateDomeCloud(150, 4000, 3.5, 'vertexShader', 'fragmentShader');
                     scene.add( pcSphere );
 
-                    var geometry = new THREE.SphereGeometry( 70, 32, 32 );
+                    var geometry = new THREE.SphereGeometry( 50, 32, 32 );
                     pulseMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000} );
-                    var sphere = new THREE.Mesh( geometry, pulseMaterial );
-                    sphere.position.z = 100.;
-                    pcSphere.add(sphere);
+                    pulseSphere = new THREE.Mesh( geometry, pulseMaterial );
+                    pulseSphere.position.z = 100.;
+                    pcSphere.add(pulseSphere);
+                    pcSphere2 = generateDomeCloud(54, 2000, 2.5, 'vs2', 'fs2');
+                    pulseSphere.add( pcSphere2 );
 
-                    var geometry = new THREE.SphereGeometry( 20, 32, 32 );
+                    var geometry = new THREE.SphereGeometry( 30, 32, 32 );
                     var material = new THREE.MeshBasicMaterial( {color: 0x000000} );
                     var sphere = new THREE.Mesh( geometry, material );
-                    sphere.position.z = 160.;
+                    sphere.position.z = 125.;
                     pcSphere.add(sphere);
 
 
@@ -318,6 +349,7 @@
                                 replay();
                             }).linTo(musiki.duration, musiki.duration);
                             musiki.set({currentTime:tCursor}).play();
+                            fft = T("fft").listen(musiki);
 
                             animate();
                         });
@@ -364,13 +396,18 @@
 
                 requestAnimationFrame(animate);
 
-                uniforms[ 'time' ].value = 0.0025 * ( Date.now() - start );
+                if (!stopTime) {
+                    uniforms[ 'time' ].value = 0.0025 * ( Date.now() - start );
+                }
+
                 if (speechActive) {
                     var ratio = (tCursorSpeech - speechMin) / (speechMax - speechMin);
-                    pulseMaterial.color.setHex(hslToHex(350+50*ratio, 100, 50));
+                    pulseMaterial.color.setHex(hslToHex(400-20*ratio, 100, 50));
                 } else {
                     pulseMaterial.color.setHex(hslToHex(400, 100, 50));
                 }
+
+                pulseSphere.scale = musiki.volume;
 
                 render();
 
@@ -434,6 +471,7 @@
                 pcSphere.rotation.x = 0.;
                 pcSphere.rotation.y = 0.;
                 speechActive = false;
+                stopTime = true;
             }
 
             function rephrase() {
@@ -447,6 +485,7 @@
                 phraseCursor = 0;
 
                 speechSeq();
+                stopTime = false;
             }
 
         </script>
