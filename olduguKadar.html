@@ -194,7 +194,7 @@
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1., 0.5, 1.75, 1.),vec4(0.75,0.75,0.75,1),ratio*0.85) * texture2D( texture, gl_PointCoord );;
+                gl_FragColor = mix(vec4(0.3, 1.5, 1.75, 1.),vec4(1.,1.,1.,1),ratio*0.85) * texture2D( texture, gl_PointCoord );;
                 if ( gl_FragColor.a < 0.85 ) discard;
             }
         </script>
@@ -309,7 +309,7 @@
 
                     //
 
-                    pcSphere = generateDomeCloud(150, 4000, 3.5, 'vertexShader', 'fragmentShader');
+                    pcSphere = generateDomeCloud(150, 1000, 7.5, 'vertexShader', 'fragmentShader');
                     scene.add( pcSphere );
 
                     var geometry = new THREE.SphereGeometry( 60, 32, 32 );
@@ -317,13 +317,13 @@
                     pulseSphere = new THREE.Mesh( geometry, pulseMaterial );
                     pulseSphere.position.z = 100.;
                     pcSphere.add(pulseSphere);
-                    pcSphere2 = generateDomeCloud(65, 500, 2.5, 'vs2', 'fs2');
+                    pcSphere2 = generateDomeCloud(70, 500, 3.5, 'vs2', 'fs2');
                     pulseSphere.add( pcSphere2 );
 
                     var geometry = new THREE.SphereGeometry( 40, 32, 32 );
                     var material = new THREE.MeshBasicMaterial( {color: 0x000000} );
                     var sphere = new THREE.Mesh( geometry, material );
-                    sphere.position.z = 130.;
+                    sphere.position.z = 140.;
                     pcSphere.add(sphere);
 
 
