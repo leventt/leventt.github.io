@@ -157,8 +157,7 @@
             init();
 
             function init() {
-                // https://github.com/hughsk/matcap/tree/master/textures
-                tloader.load( 'res/raks/raks.png', function (texture) {
+                tloader.load( 'res/headshot/headshot.png', function (texture) {
 
                     container = document.getElementById( 'canvas' );
                     scene = new THREE.Scene();
@@ -221,9 +220,10 @@
                         controls.enablePan = false;
                         controls.minPolarAngle = (Math.PI / 360.) * 120;
                         controls.maxPolarAngle = (Math.PI / 360.) * 120;
-                        controls.minAzimuthAngle = (Math.PI / 360.) * -60.;
-                        controls.maxAzimuthAngle = (Math.PI / 360.) * 60.;
+                        controls.minAzimuthAngle = (Math.PI / 360.) * 0.;
+                        controls.maxAzimuthAngle = (Math.PI / 360.) * 0.;
                         controls.constraint.panUp(60);
+                        controls.update();
 
                         uniformsHeadshot[ 'time' ].value = 0.00025 * ( Date.now() - start );
 
@@ -231,9 +231,9 @@
                             document.getElementById( 'loading' ).innerHTML = "";
 
                             musiki = this;
-                            tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
+                            tCursor = T("param", {value:musiki.duration/7., ar:true}).on("ended", function() {
                                 tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
-                                    tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
+                                    tCursor.sinTo(musiki.duration/4.*3., musiki.duration/2.);
                                 }).linTo(musiki.duration, musiki.duration);
                             }).sinTo(0., musiki.duration/5.);
                             musiki.set({currentTime:tCursor}).play();
@@ -249,9 +249,6 @@
             function animate() {
 
                 requestAnimationFrame(animate);
-
-                controls.constraint.rotateLeft((controls.getAzimuthalAngle() - Math.PI / -360. * ((tCursor.value/musiki.duration * 120.) - 60.)));
-                controls.update();
 
                 mixer.update((tCursor.value - oldCursorVal)*0.001);
                 oldCursorVal = tCursor.value;
@@ -308,18 +305,18 @@
                 tCursor.pause();
                 tCursor = T("param", {value:tCursor.value, ar:true}).on("ended", function() {
                     musiki.pause();
-                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), musiki.duration*Math.abs(dragRatio));
+                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), 5.*musiki.duration*Math.abs(dragRatio));
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
             });
 
             function replay() {
-                tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
+                tCursor = T("param", {value:musiki.duration/7., ar:true}).on("ended", function() {
                     tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
                         tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
                     }).linTo(musiki.duration, musiki.duration);
-                }).sinTo(0., musiki.duration/5.);
+                }).sinTo(0., musiki.duration/2.);
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
