@@ -163,8 +163,8 @@
                     scene = new THREE.Scene();
                     scene.fog = new THREE.Fog( 0xcccccc, 0.001, 10000. );
 
-                    camera = new THREE.PerspectiveCamera( 75, 2.0, 0.001, 10000 );
-                    camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 200 ) );
+                    camera = new THREE.PerspectiveCamera( 45, 3.0, 0.001, 10000 );
+                    camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 260 ) );
 
                     uniformsHeadshot.tMatCap.value = texture;
 
@@ -209,7 +209,7 @@
                         // renderer
 
                         renderer = Detector.webgl ? new THREE.WebGLRenderer( { alpha: true, antialiasing: true } ) : new THREE.CanvasRenderer( { alpha: true, antialiasing: true } );
-                        renderer.setSize( 888, 444 );
+                        renderer.setSize( 999, 333 );
                         renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
                         container.appendChild( renderer.domElement );
 
@@ -314,9 +314,9 @@
             function replay() {
                 tCursor = T("param", {value:musiki.duration/7., ar:true}).on("ended", function() {
                     tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
-                        tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
+                        tCursor.sinTo(musiki.duration/4.*3., musiki.duration/2.);
                     }).linTo(musiki.duration, musiki.duration);
-                }).sinTo(0., musiki.duration/2.);
+                }).sinTo(0., musiki.duration/5.);
                 musiki.set({currentTime:tCursor}).play();
 
                 animate();
