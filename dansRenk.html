@@ -133,7 +133,7 @@
 
                 vec3 r = reflect( e, n );
                 float m = 2. * sqrt( pow( r.x, 2. ) + pow( r.y, 2. ) + pow( r.z + 1., 2. ) );
-                vec2 vN = r.xy / m + .5;
+                vec2 vN = r.xy / m + 0.5;
 
                 vec3 base = texture2D( tMatCap, vN ).rgb;
                 gl_FragColor = vec4( base, 1. );
@@ -162,9 +162,9 @@
 
                     container = document.getElementById( 'canvas' );
                     scene = new THREE.Scene();
-                    scene.fog = new THREE.Fog( 0xcccccc, .001, 10000. );
+                    scene.fog = new THREE.Fog( 0xcccccc, 0.001, 10000. );
 
-                    camera = new THREE.PerspectiveCamera( 75, 2.0, .001, 10000 );
+                    camera = new THREE.PerspectiveCamera( 75, 2.0, 0.001, 10000 );
                     camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 200 ) );
 
                     uniformsHeadshot.tMatCap.value = texture;
@@ -225,9 +225,9 @@
                         controls.maxAzimuthAngle = (Math.PI / 360.) * 60.;
                         controls.constraint.panUp(60);
 
-                        uniformsHeadshot[ 'time' ].value = .00025 * ( Date.now() - start );
+                        uniformsHeadshot[ 'time' ].value = 0.00025 * ( Date.now() - start );
 
-                        T("audio").load("res/speech/eightbase.wav", function() {
+                        T("audio").load("res/raks/raks.wav", function() {
                             document.getElementById( 'loading' ).innerHTML = "";
 
                             musiki = this;
@@ -265,7 +265,7 @@
                 camera.updateMatrixWorld();
                 renderer.render( scene, camera );
 
-                uniformsHeadshot[ 'time' ].value = .00025 * ( Date.now() - start );
+                uniformsHeadshot[ 'time' ].value = 0.00025 * ( Date.now() - start );
 
             }
 
