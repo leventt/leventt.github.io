@@ -12,22 +12,21 @@
     <body>
         <div id="logotext">
             <div id="tjslogo"></div>
-            <div class="hiddenlogo", id="logo">eskizler // sketches</div>
+            <div class="hiddenlogo", id="logo">hello world.</div>
         </div>
         <div class="hiddencontent", id="nav">
-        <a href="/musikiKafalar.html">musikiKafalar. ♫</a>
+        <a target="_blank" href="https://github.com/leventt">github</a>
         <br>
-        <a href="/olduguKadar.html">olduğuKadar. ♫</a>
+        <a target="_blank" href="http://www.imdb.com/name/nm6639341/">imdb</a>
         <br>
-        <a href="/dansRenk.html">dansRenk. ♫</a>
+        <a target="_blank" href="https://vimeo.com/leventtasel">vimeo</a>
         <br>
+        <a target="_blank" href="https://soundcloud.com/evhali">soundcloud</a>
         <br>
-        <a href="https://github.com/leventt/leventt.github.io">src</a>
-        <br>
-        <a href="http://leventtasel.com/">cargo</a>
+        <a target="_blank" href="https://www.linkedin.com/in/ahmet-levent-tasel-19ab4a88">linkedin</a>
         <div class="hiddencontent", id="content">
-        <script src="external/js/jquery-1.12.0.min.js"></script>
-        <script src="external/js/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js"></script>
         <script src="external/js/Detector.js"></script>
         <script type="x-shader/x-vertex" id="vertexShader">
             uniform float time;
@@ -178,7 +177,7 @@
 
             var renderer, scene, camera;
             var bsize = 200;
-            var pointSize = bsize * 0.035;
+            var pointSize = bsize * 0.055;
             var rotateY = new THREE.Matrix4().makeRotationY( 0.01 );
             var uniforms = {
 
@@ -188,6 +187,7 @@
 
             };
             var start = Date.now();
+            var once = true;
 
             var loader = new THREE.TextureLoader();
             loader.load( 'res/particle.png', function (texture) {
@@ -197,6 +197,8 @@
                 render();
 
                 $("body").on('touchstart mousedown', function(event) {
+                    if ( ! once ) { return; }
+                    once = false;
                     start = Date.now();
                     uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
                     animate();
@@ -230,7 +232,7 @@
                         lon -= Math.floor(lon);
                         lon *= Math.PI * 2;
                         if (lon > Math.PI) {lon -= Math.PI * 2;}
-                        var lat = Math.asin(-1 + 2 * (i+1) / (pCount+0.0));
+                        var lat = Math.asin(-1 + 2 * (i+1) / (pCount + 32.0));
 
                         var x = R * Math.cos(lat) * Math.cos(lon);
                         var y = R * Math.cos(lat) * Math.sin(lon);
@@ -263,7 +265,7 @@
 
             function init() {
 
-                uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
+                uniforms[ 'time' ].value = 0.0;
 
                 container = document.getElementById( 'tjslogo' );
 
@@ -271,7 +273,6 @@
 
                 camera = new THREE.PerspectiveCamera( 35, 1.0, 1, 10000 );
                 camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0,0,600 ) );
-                // camera.applyMatrix( new THREE.Matrix4().makeRotationX( -0.5 ) );
 
                 //
 
@@ -296,7 +297,9 @@
 
             function animate() {
 
-                requestAnimationFrame( animate );
+                if ( uniforms[ 'time' ].value < 1.0) {
+                    requestAnimationFrame( animate );
+                }
 
                 uniforms[ 'time' ].value = 0.00025 * ( Date.now() - start );
 
@@ -306,7 +309,6 @@
 
             function render() {
 
-                // camera.applyMatrix( rotateY );
                 camera.updateMatrixWorld();
                 renderer.render( scene, camera );
 
