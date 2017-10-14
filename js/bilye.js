@@ -1,8 +1,10 @@
-if (! Detector.webgl) Detector.addGetWebGLMessage();
+if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 var renderer, scene, camera;
+var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 200;
-var pointSize = bsize * 0.055;
+var pointSize = 5.5 * pratio;
+console.log(pratio);
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var uniforms = {
     time:    { type: "f", value: 0.0 },
@@ -79,6 +81,7 @@ function generateDomeCloud() {
             attribute float size;
             varying vec3 fN;
             varying vec3 fV;
+            varying float fSize;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -199,6 +202,7 @@ function generateDomeCloud() {
 
                 fN = N;
                 fV = -vec3(modelViewMatrix*vec4(newPosition, 1.0));
+                fSize = size;
 
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
                 gl_PointSize = size;
@@ -209,12 +213,14 @@ function generateDomeCloud() {
             uniform sampler2D texture;
             varying vec3 fN;
             varying vec3 fV;
+            varying float fSize;
 
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
                 gl_FragColor = mix(vec4(1,1,1,1),vec4(0.5,0.5,0.5,1),ratio) * texture2D(texture, gl_PointCoord);
-                if (gl_FragColor.a < 0.85) discard;
+                if (gl_FragColor.a < 0.8 && (fSize/5.5) >= 1.0) discard;
+                if (gl_FragColor.a < 0.7 && (fSize/5.5) < 1.0) discard;
             }
         `,
     });
@@ -241,9 +247,9 @@ function init() {
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true }) : new THREE.CanvasRenderer({ alpha: true });
+    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
     renderer.setSize(bsize, bsize);
-    renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
+    renderer.setPixelRatio(pratio);
     container.appendChild(renderer.domElement);
 }
 
