@@ -3,8 +3,7 @@ if (!Detector.webgl) Detector.addGetWebGLMessage();
 var renderer, scene, camera;
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 200;
-var pointSize = 5.5 * pratio;
-console.log(pratio);
+var pointSize = pratio;
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var uniforms = {
     time:    { type: "f", value: 0.0 },
@@ -21,7 +20,6 @@ loader.load('res/particle.png', function (texture) {
 
     render();
 
-    $("body").on('touchstart mousedown', function(event) {
     if (! once) { return; }
     once = false;
     start = Date.now();
@@ -30,7 +28,6 @@ loader.load('res/particle.png', function (texture) {
     $(document).ready(function () {
         $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
         $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
-        });
     });
 });
 
@@ -38,30 +35,32 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 5000;
+    var pCount = 7759;
 
     var positions = new Float32Array(pCount * 3);
     var sizes = new Float32Array(pCount);
+    var layer = new Float32Array(pCount);
 
     for(var j = 0; j < 1; j++) {
-        for(var i = 0; i < pCount; i++) {
-            var R = 150 - (16 * (j));
+        for(var i = 1; i <= pCount; i++) {
+            var R = 150 + 10*j;
 
             var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
             var GA = PHI * Math.PI * 2;           // golden angle
 
-            var lon = GA * (i+1);
+            var lon = GA * i;
             lon /= Math.PI * 2;
             lon -= Math.floor(lon);
             lon *= Math.PI * 2;
             if (lon > Math.PI) {lon -= Math.PI * 2;}
-            var lat = Math.asin(-1 + 2 * (i+1) / (pCount + 32.0));
+            var lat = Math.asin((2 * i) / pCount);
 
             var x = R * Math.cos(lat) * Math.cos(lon);
             var y = R * Math.cos(lat) * Math.sin(lon);
             var z = R * Math.sin(lat);
 
-            sizes[ k ] = pointSize;
+            sizes[ k ] = pointSize * 4.5;
+            layer[ k ] = j;
             positions[ k*3 ] = x;
             positions[ k*3+1 ] = y;
             positions[ k*3+2 ] = z;
@@ -71,6 +70,7 @@ function generateDomeCloud() {
     }
 
     geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    geometry.addAttribute('layer', new THREE.BufferAttribute(layer, 1));
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.computeBoundingBox();
 
@@ -79,9 +79,11 @@ function generateDomeCloud() {
         vertexShader: `
             uniform float time;
             attribute float size;
+            attribute float layer;
             varying vec3 fN;
             varying vec3 fV;
             varying float fSize;
+            varying float fDisp;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -193,19 +195,21 @@ function generateDomeCloud() {
                 vec3 N = normalize(position);
                 float radius = length(position);
 
-                float noise = 1000.0 *  -0.10 * turbulence(0.5 * N + time);
-                float b = 5.0 * pnoise(0.05 * position + vec3(2.0 * time), vec3(100.0));
-                float displacement = - noise + b + time * 75.;
-                displacement = clamp(displacement, 0., 15.);
+                float rtime = pow(time + .001, .5);
+                float noise = 1000.0 *  -0.10 * turbulence(0.5 * N + rtime);
+                float b = 5.0 * pnoise(0.05 * position + vec3(2.0 * rtime), vec3(100.0));
+                float displacement = - noise + b + rtime * 75.;
+                displacement = clamp(displacement, 0., 25.);
 
                 vec3 newPosition = position + N * displacement;
 
                 fN = N;
                 fV = -vec3(modelViewMatrix*vec4(newPosition, 1.0));
                 fSize = size;
+                fDisp = displacement;
 
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
-                gl_PointSize = size;
+                gl_PointSize = size * pow(fDisp / 25.0, .5);
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
@@ -214,13 +218,14 @@ function generateDomeCloud() {
             varying vec3 fN;
             varying vec3 fV;
             varying float fSize;
+            varying float fDisp;
 
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1,1,1,1),vec4(0.5,0.5,0.5,1),ratio) * texture2D(texture, gl_PointCoord);
+                gl_FragColor = mix(vec4(1, 1, 1, 1.2),vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5)) * texture2D(texture, gl_PointCoord);
                 if (gl_FragColor.a < 0.8 && (fSize/5.5) >= 1.0) discard;
-                if (gl_FragColor.a < 0.7 && (fSize/5.5) < 1.0) discard;
+                if (gl_FragColor.a < 0.5 && (fSize/5.5) < 1.0) discard;
             }
         `,
     });
@@ -242,8 +247,8 @@ function init() {
     var pcSphere = generateDomeCloud();
     scene.add(pcSphere);
 
-    var geometry = new THREE.SphereGeometry(155, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0x888888});
+    var geometry = new THREE.SphereGeometry(165, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0xaaaaaa});
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
@@ -258,7 +263,7 @@ function animate() {
         requestAnimationFrame(animate);
     }
 
-    uniforms[ 'time' ].value = 0.00025 * (Date.now() - start);
+    uniforms[ 'time' ].value = 0.00005 * (Date.now() - start);
 
     render();
 }
