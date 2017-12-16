@@ -7,8 +7,9 @@ var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 250;
 var pointSize = pratio;
 var uniforms = {
-    time:    { type: "f", value: 0.0 },
-    size:    { type: "f", value: pointSize * 3.5 }
+    time: {type: "f", value: 0.0},
+    size: {type: "f", value: pointSize * 3.5},
+    seed: {type:"f", value: Math.random()}
 };
 var start = Date.now();
 var once = true;
@@ -69,6 +70,7 @@ function generateDomeCloud() {
         vertexShader: `
             uniform float time;
             uniform float size;
+            uniform float seed;
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
@@ -185,9 +187,8 @@ function generateDomeCloud() {
                 fTime = time;
 
                 float rtime = pow(time + .001, .25);
-                float seed = .1;
                 float noise = clamp(rtime * 10., 4., 9.) * turbulence(N + seed) - .7;
-                float b = 3.0 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
+                float b = 0.1 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
                 float displacement = noise + b;
                 displacement = pow(abs(noise), 1.1) + b * .15;
                 displacement = clamp(displacement, 0., 10.);

@@ -61,9 +61,9 @@ function generateDomeCloud() {
 
             sizes[ k ] = pointSize * 4.5;
             layer[ k ] = j;
-            positions[ k*3 ] = x;
-            positions[ k*3+1 ] = y;
-            positions[ k*3+2 ] = z;
+            positions[ k*3 ] = (isNaN(x)) ? 0.: x;
+            positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
+            positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
 
             k++;
         }
