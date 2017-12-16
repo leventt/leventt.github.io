@@ -202,7 +202,7 @@ function generateDomeCloud() {
                 float noise = clamp(rtime * 10., 4., 9.) * turbulence(N + seed) - .7;
                 float b = 3.0 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
                 float displacement = noise + b;
-                displacement = pow(noise, 1.1) + b * .15;
+                displacement = pow(abs(noise), 1.1) + b * .15;
                 displacement = clamp(displacement, 0., 10.);
 
                 if (displacement <= 1.) {
@@ -254,17 +254,17 @@ function generateDomeCloud() {
                 if (intensity > 0.) {
                     vec3 h = normalize(lDir + fV);  
                     specr = max(dot(h, fN), 0.0);
-                    spec = .3 * pow(specr, 0.5);
+                    spec = .3 * pow(abs(specr), 0.5);
                 }
 
                 float ratio = dot(normalize(fV), normalize(fN));
-                float dratio = pow(fDisp / 5.5, 1.5);
+                float dratio = pow(abs(fDisp / 5.5), 1.5);
                 vec3 diffuse = mix(vec3(.7, .8, .9), mix(vec3(.4, .7, .1), vec3(.9, .88, .7), dratio), clamp(pow(ratio, .45), 0.1, 1.));
                 if (fDisp <= 3.4) {
                     diffuse = vec3(0.23, 0.78, .98);
                     diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(ratio, .7), 0.1, 1.));
                     if (intensity > 0.)
-                        spec = .7 * pow(specr, .65);
+                        spec = .7 * pow(abs(specr), .65);
                 }
 
                 gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(-.2, -.1, -.05)), 1.);
