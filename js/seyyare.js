@@ -8,15 +8,12 @@ var bsize = 250;
 var pointSize = pratio;
 var uniforms = {
     time:    { type: "f", value: 0.0 },
-    color:   { type: "c", value: new THREE.Color(0xffffff) },
-    texture: { type: "t", value: null }
+    size:    { type: "f", value: pointSize * 3.5 }
 };
 var start = Date.now();
 var once = true;
 
-var loader = new THREE.TextureLoader();
-loader.load('res/particle.png', function (texture) {
-    uniforms.texture.value = texture;
+$(document).ready(function () {
     init();
 
     render();
@@ -26,10 +23,9 @@ loader.load('res/particle.png', function (texture) {
     start = Date.now();
     uniforms[ 'time' ].value = 0.00025 * (Date.now() - start);
     animate();
-    $(document).ready(function () {
-        $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
-        $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
-    });
+
+    $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
+    $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
 });
 
 function generateDomeCloud() {
@@ -37,10 +33,7 @@ function generateDomeCloud() {
 
     var k = 0;
     var pCount = 100000;
-
     var positions = new Float32Array(pCount * 3);
-    var sizes = new Float32Array(pCount);
-    var layer = new Float32Array(pCount);
 
     for(var j = 0; j < 1; j++) {
         for(var i = 1; i <= pCount; i++) {
@@ -60,29 +53,24 @@ function generateDomeCloud() {
             var y = R * Math.cos(lat) * Math.sin(lon);
             var z = R * Math.sin(lat);
 
-            sizes[ k ] = pointSize * 3.5;
-            layer[ k ] = j;
-            positions[ k*3 ] = x;
-            positions[ k*3+1 ] = y;
-            positions[ k*3+2 ] = z;
+            positions[ k*3 ] = (isNaN(x)) ? 0.: x;
+            positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
+            positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
 
             k++;
         }
     }
 
-    geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    geometry.addAttribute('layer', new THREE.BufferAttribute(layer, 1));
+    // new THREE.IcosahedronGeometry([100, 1])
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     var material = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: `
             uniform float time;
-            attribute float size;
-            attribute float layer;
+            uniform float size;
             varying vec3 fN;
             varying vec3 fV;
-            varying float fSize;
             varying float fDisp;
             varying float fTime;
 
@@ -210,8 +198,6 @@ function generateDomeCloud() {
                 }
 
                 vec3 newPosition = position + N * displacement;
-
-                fSize = size;
                 fDisp = displacement;
 
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
@@ -222,10 +208,8 @@ function generateDomeCloud() {
             }
         `,
         fragmentShader: `
-            uniform sampler2D texture;
             varying vec3 fN;
             varying vec3 fV;
-            varying float fSize;
             varying float fDisp;
             varying float fTime;
 
