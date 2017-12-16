@@ -4,7 +4,7 @@ var renderer, scene, camera;
 var pcSphere;
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-var bsize = 400;
+var bsize = 250;
 var pointSize = pratio;
 var uniforms = {
     time:    { type: "f", value: 0.0 },
@@ -36,7 +36,7 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 500000;
+    var pCount = 100000;
 
     var positions = new Float32Array(pCount * 3);
     var sizes = new Float32Array(pCount);
@@ -60,7 +60,7 @@ function generateDomeCloud() {
             var y = R * Math.cos(lat) * Math.sin(lon);
             var z = R * Math.sin(lat);
 
-            sizes[ k ] = pointSize * 2.5;
+            sizes[ k ] = pointSize * 3.5;
             layer[ k ] = j;
             positions[ k*3 ] = x;
             positions[ k*3+1 ] = y;
@@ -73,7 +73,6 @@ function generateDomeCloud() {
     geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
     geometry.addAttribute('layer', new THREE.BufferAttribute(layer, 1));
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.computeBoundingBox();
 
     var material = new THREE.ShaderMaterial({
         uniforms: uniforms,
@@ -259,12 +258,12 @@ function generateDomeCloud() {
 
                 float ratio = dot(normalize(fV), normalize(fN));
                 float dratio = pow(abs(fDisp / 5.5), 1.5);
-                vec3 diffuse = mix(vec3(.7, .8, .9), mix(vec3(.4, .7, .1), vec3(.9, .88, .7), dratio), clamp(pow(ratio, .45), 0.1, 1.));
+                vec3 diffuse = mix(vec3(.7, .8, .9), mix(vec3(.4, .7, .1), vec3(.9, .88, .7), dratio), clamp(pow(abs(ratio), .45), 0.1, 1.));
                 if (fDisp <= 3.4) {
-                    diffuse = vec3(0.23, 0.78, .98);
-                    diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(ratio, .7), 0.1, 1.));
-                    if (intensity > 0.)
+                    diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
+                    if (intensity > 0.) {
                         spec = .7 * pow(abs(specr), .65);
+                    }
                 }
 
                 gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(-.2, -.1, -.05)), 1.);
@@ -289,13 +288,13 @@ function init() {
     pcSphere = generateDomeCloud();
     scene.add(pcSphere);
 
-    var geometry = new THREE.SphereGeometry(160, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xAABFEE, transparent: true, opacity: 0.1});
+    var geometry = new THREE.SphereGeometry(165, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0xAABFEE, transparent: true, opacity: 0.05});
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    var geometry = new THREE.SphereGeometry(165, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xCCEEFF, transparent: true, opacity: 0.05});
+    var geometry = new THREE.SphereGeometry(168, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0xCCEEFF, transparent: true, opacity: 0.01});
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
