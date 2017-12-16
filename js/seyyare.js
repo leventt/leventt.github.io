@@ -33,7 +33,7 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 500000;
+    var pCount = 100000;
     var positions = new Float32Array(pCount * 3);
 
     for(var j = 0; j < 1; j++) {
