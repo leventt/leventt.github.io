@@ -35,6 +35,7 @@ $(document).ready(function () {
     init();
 
     gui = new dat.GUI({autoPlace: false});
+    gui.closed = true;
     // gui.add(controls, 'time').step(.01).listen();
     // gui.add(controls, 'particleSize', 0., 20.).step(.01);
     gui.add(controls, 'seed', 0., 100.).step(.001);
@@ -58,7 +59,7 @@ $(document).ready(function () {
     animate();
 
     $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
-    $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
+    $("div.hiddencontent").fadeIn(30000).removeClass("hiddencontent");
 });
 
 function generateDomeCloud() {
