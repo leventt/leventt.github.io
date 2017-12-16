@@ -8,21 +8,39 @@ var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    size: {type: "f", value: pointSize * 4.},
-    seed: {type:"f", value: Math.random()}
+    particleSize: {type: "f", value: pointSize * 4.},
+    seed: {type: "f", value: Math.random()},
+    waterLevel: {type: "f", value: 3.4}
 };
 var start = Date.now();
 var once = true;
+var gui;
+var Controls = function() {
+    this.time = uniforms['time'].value;
+    this.particleSize = uniforms['particleSize'].value;
+    this.seed = uniforms['seed'].value;
+    this.waterLevel = uniforms['waterLevel'].value;
+};
+var controls = new Controls();
 
 $(document).ready(function () {
     init();
+
+    gui = new dat.GUI();
+    // gui.add(controls, 'time').step(.01).listen();
+    gui.add(controls, 'particleSize', 0., 20.).step(.01);
+    gui.add(controls, 'seed', 0., 100.).step(.001);
+    gui.add(controls, 'waterLevel', 0., 10.).step(.001);
+
 
     render();
 
     if (! once) { return; }
     once = false;
     start = Date.now();
-    uniforms[ 'time' ].value = 0.00025 * (Date.now() - start);
+
+    controls.time = 0.00025 * (Date.now() - start)
+    uniforms['time'].value = controls.time;
     animate();
 
     $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
@@ -78,13 +96,15 @@ function generateDomeCloud() {
     var material = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: `
+            uniform float waterLevel;
             uniform float time;
-            uniform float size;
+            uniform float particleSize;
             uniform float seed;
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
             varying vec3 fLDir;
+            varying float fWaterLevel;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -232,7 +252,9 @@ function generateDomeCloud() {
                 fLDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime * 1.3) * vec4(fLDir, 1.)).xyz;
                 fLDir = normalize(fLDir);
 
-                gl_PointSize = size;
+                fWaterLevel = waterLevel;
+
+                gl_PointSize = particleSize;
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
@@ -240,6 +262,7 @@ function generateDomeCloud() {
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
+            varying float fWaterLevel;
             varying vec3 fLDir;
 
             void main() {
@@ -255,7 +278,7 @@ function generateDomeCloud() {
                 float ratio = dot(normalize(fV), normalize(fN));
                 float dratio = pow(abs(fDisp / 5.5), 1.5);
                 vec3 diffuse = mix(vec3(.7, .8, .9), mix(vec3(.4, .7, .1), vec3(.9, .88, .7), dratio), clamp(pow(abs(ratio), .45), 0.1, 1.));
-                if (fDisp <= 3.4) {
+                if (fDisp <= fWaterLevel) {
                     diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
                     if (intensity > 0.) {
                         spec = .7 * pow(abs(specr), 3.65);
@@ -272,7 +295,8 @@ function generateDomeCloud() {
 }
 
 function init() {
-    uniforms[ 'time' ].value = 0.0;
+    controls.time = 0.;
+    uniforms['time'].value = controls.time;
 
     container = document.getElementById('seyyare');
 
@@ -291,12 +315,16 @@ function init() {
 }
 
 function animate() {
-    // if (uniforms[ 'time' ].value < 1.0) {
+    // if (contorls.time < 1.0) {
     //     requestAnimationFrame(animate);
     // }
 
     requestAnimationFrame(animate);
-    uniforms[ 'time' ].value = 0.00005 * (Date.now() - start);
+    controls.time = 0.00005 * (Date.now() - start);
+    uniforms['time'].value = controls.time;
+    uniforms['particleSize'].value = controls.particleSize;
+    uniforms['seed'].value = controls.seed;
+    uniforms['waterLevel'].value = controls.waterLevel;
 
     render();
 }
