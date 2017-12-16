@@ -8,9 +8,13 @@ var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 4.},
+    particleSize: {type: "f", value: pointSize * 2.6},
     seed: {type: "f", value: Math.random()},
-    waterLevel: {type: "f", value: 3.4}
+    waterLevel: {type: "f", value: 3.4},
+    colorA: {type: "c", value: new THREE.Color(0x14395d)},
+    colorB: {type: "c", value: new THREE.Color(0x8ac3da)},
+    colorC: {type: "c", value: new THREE.Color(0x173a1a)},
+    colorD: {type: "c", value: new THREE.Color(0xfdfcd7)}
 };
 var start = Date.now();
 var once = true;
@@ -20,18 +24,28 @@ var Controls = function() {
     this.particleSize = uniforms['particleSize'].value;
     this.seed = uniforms['seed'].value;
     this.waterLevel = uniforms['waterLevel'].value;
+    this.colorA = uniforms['colorA'].value.getHex();
+    this.colorB = uniforms['colorB'].value.getHex();
+    this.colorC = uniforms['colorC'].value.getHex();
+    this.colorD = uniforms['colorD'].value.getHex();
 };
 var controls = new Controls();
 
 $(document).ready(function () {
     init();
 
-    gui = new dat.GUI();
+    gui = new dat.GUI({autoPlace: false});
     // gui.add(controls, 'time').step(.01).listen();
-    gui.add(controls, 'particleSize', 0., 20.).step(.01);
+    // gui.add(controls, 'particleSize', 0., 20.).step(.01);
     gui.add(controls, 'seed', 0., 100.).step(.001);
-    gui.add(controls, 'waterLevel', 0., 10.).step(.001);
+    gui.add(controls, 'waterLevel', -1, 10.).step(.001);
+    gui.addColor(controls, 'colorA');
+    gui.addColor(controls, 'colorB');
+    gui.addColor(controls, 'colorC');
+    gui.addColor(controls, 'colorD');
 
+    var contentContainer = document.getElementById('content');
+    contentContainer.appendChild(gui.domElement);
 
     render();
 
@@ -104,7 +118,6 @@ function generateDomeCloud() {
             varying vec3 fV;
             varying float fDisp;
             varying vec3 fLDir;
-            varying float fWaterLevel;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -252,17 +265,19 @@ function generateDomeCloud() {
                 fLDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime * 1.3) * vec4(fLDir, 1.)).xyz;
                 fLDir = normalize(fLDir);
 
-                fWaterLevel = waterLevel;
-
                 gl_PointSize = particleSize;
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
         fragmentShader: `
+            uniform vec3 colorA;
+            uniform vec3 colorB;
+            uniform vec3 colorC;
+            uniform vec3 colorD;
+            uniform float waterLevel;
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
-            varying float fWaterLevel;
             varying vec3 fLDir;
 
             void main() {
@@ -277,9 +292,9 @@ function generateDomeCloud() {
 
                 float ratio = dot(normalize(fV), normalize(fN));
                 float dratio = pow(abs(fDisp / 5.5), 1.5);
-                vec3 diffuse = mix(vec3(.7, .8, .9), mix(vec3(.4, .7, .1), vec3(.9, .88, .7), dratio), clamp(pow(abs(ratio), .45), 0.1, 1.));
-                if (fDisp <= fWaterLevel) {
-                    diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
+                vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .45), 0.1, 1.));
+                if (fDisp <= waterLevel) {
+                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
                     if (intensity > 0.) {
                         spec = .7 * pow(abs(specr), 3.65);
                     }
@@ -325,6 +340,10 @@ function animate() {
     uniforms['particleSize'].value = controls.particleSize;
     uniforms['seed'].value = controls.seed;
     uniforms['waterLevel'].value = controls.waterLevel;
+    uniforms['colorA'].value.set(controls.colorA);
+    uniforms['colorB'].value.set(controls.colorB);
+    uniforms['colorC'].value.set(controls.colorC);
+    uniforms['colorD'].value.set(controls.colorD);
 
     render();
 }

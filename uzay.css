@@ -48,6 +48,13 @@ body {
     color: #aaa;
     background-color: #000;
 }
+div.dg {
+    font-family: josefin;
+    color: #FAFAFA;
+}
+.dg {
+    display: inline-block;
+}
 #content {
     font-family: josefin;
     width: 100%;
