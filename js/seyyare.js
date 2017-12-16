@@ -4,11 +4,11 @@ var renderer, scene, camera;
 var pcSphere;
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-var bsize = 250;
+var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    size: {type: "f", value: pointSize * 3.5},
+    size: {type: "f", value: pointSize * 4.},
     seed: {type:"f", value: Math.random()}
 };
 var start = Date.now();
@@ -33,7 +33,7 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 100000;
+    var pCount = 500000;
     var positions = new Float32Array(pCount * 3);
 
     for(var j = 0; j < 1; j++) {
@@ -62,6 +62,16 @@ function generateDomeCloud() {
         }
     }
 
+    // hs = new Hexasphere(150, 32, 7.);
+    // var positions = new Float32Array(hs.tiles.length * 3);
+    // var k = 0;
+    // console.log(hs.tiles.length);
+    // for(var i=0; i < hs.tiles.length; i++) {
+    //     positions[ i*3 ] = (isNaN(hs.tiles[i].centerPoint.x)) ? 0.: hs.tiles[i].centerPoint.x;
+    //     positions[ i*3+1 ] = (isNaN(hs.tiles[i].centerPoint.y)) ? 0.: hs.tiles[i].centerPoint.y;
+    //     positions[ i*3+2 ] = (isNaN(hs.tiles[i].centerPoint.z)) ? 0.: hs.tiles[i].centerPoint.z;
+    // }
+
     // new THREE.IcosahedronGeometry([100, 1])
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
 
@@ -74,7 +84,7 @@ function generateDomeCloud() {
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
-            varying float fTime;
+            varying vec3 fLDir;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -182,9 +192,22 @@ function generateDomeCloud() {
                 return t;
             }
 
+            // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
+            mat4 rotationMatrix(vec3 axis, float angle)
+            {
+                axis = normalize(axis);
+                float s = sin(angle);
+                float c = cos(angle);
+                float oc = 1.0 - c;
+                
+                return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                            oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                            oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                            0.0,                                0.0,                                0.0,                                1.0);
+            }
+
             void main() {
                 vec3 N = normalize(position);
-                fTime = time;
 
                 float rtime = pow(time + .001, .25);
                 float noise = clamp(rtime * 10., 4., 9.) * turbulence(N + seed) - .7;
@@ -204,6 +227,11 @@ function generateDomeCloud() {
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
                 fV = mvPosition.xyz;
                 fN = N;
+
+                fLDir = normalize(vec3(300, 100, -150));
+                fLDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime * 1.3) * vec4(fLDir, 1.)).xyz;
+                fLDir = normalize(fLDir);
+
                 gl_PointSize = size;
                 gl_Position = projectionMatrix * mvPosition;
             }
@@ -212,33 +240,16 @@ function generateDomeCloud() {
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
-            varying float fTime;
-
-            // http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
-            mat4 rotationMatrix(vec3 axis, float angle)
-            {
-                axis = normalize(axis);
-                float s = sin(angle);
-                float c = cos(angle);
-                float oc = 1.0 - c;
-                
-                return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-                            oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-                            oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-                            0.0,                                0.0,                                0.0,                                1.0);
-            }
+            varying vec3 fLDir;
 
             void main() {
-                float rtime = pow(fTime + .001, .25);
-                vec3 lDir = normalize(vec3(500, 100, 100));
-                lDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime) * vec4(lDir, 1.)).xyz;
-                float intensity = max(dot(fN, lDir), 0.0);
+                float intensity = max(dot(fN, fLDir), 0.0);
                 float specr = 0.;
                 float spec = 0.;
                 if (intensity > 0.) {
-                    vec3 h = normalize(lDir + fV);  
+                    vec3 h = normalize(fLDir + fV);  
                     specr = max(dot(h, fN), 0.0);
-                    spec = .3 * pow(abs(specr), 0.5);
+                    spec = .05 * pow(abs(specr), 0.1);
                 }
 
                 float ratio = dot(normalize(fV), normalize(fN));
@@ -247,7 +258,7 @@ function generateDomeCloud() {
                 if (fDisp <= 3.4) {
                     diffuse = mix(vec3(1.), mix(vec3(0.13, 0.67, 1.), vec3(0.43, 0.88, .98), dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
                     if (intensity > 0.) {
-                        spec = .7 * pow(abs(specr), .65);
+                        spec = .7 * pow(abs(specr), 3.65);
                     }
                 }
 
@@ -272,16 +283,6 @@ function init() {
 
     pcSphere = generateDomeCloud();
     scene.add(pcSphere);
-
-    var geometry = new THREE.SphereGeometry(165, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xAABFEE, transparent: true, opacity: 0.05});
-    var sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
-
-    var geometry = new THREE.SphereGeometry(168, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xCCEEFF, transparent: true, opacity: 0.01});
-    var sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
 
     renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
     renderer.setSize(bsize, bsize);
