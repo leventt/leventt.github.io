@@ -8,12 +8,12 @@ var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 3.1},
+    particleSize: {type: "f", value: pointSize * 7.},
     seed: {type: "f", value: Math.random()},
     waterLevel: {type: "f", value: 3.4},
     colorA: {type: "c", value: new THREE.Color(0x8cf5d1)},
-    colorB: {type: "c", value: new THREE.Color(0x416573)},
-    colorC: {type: "c", value: new THREE.Color(0x2b3043)},
+    colorB: {type: "c", value: new THREE.Color(0x196a89)},
+    colorC: {type: "c", value: new THREE.Color(0x1b2f1e)},
     colorD: {type: "c", value: new THREE.Color(0x787456)}
 };
 var start = Date.now();
@@ -37,9 +37,9 @@ $(document).ready(function () {
     gui = new dat.GUI({autoPlace: false});
     gui.closed = true;
     // gui.add(controls, 'time').step(.01).listen();
-    // gui.add(controls, 'particleSize', 0., 20.).step(.01);
+    gui.add(controls, 'particleSize', 0., 20.).step(.01);
     gui.add(controls, 'seed', 0., 100.).step(.001);
-    gui.add(controls, 'waterLevel', -1, 10.).step(.001);
+    gui.add(controls, 'waterLevel', -1, 10.).step(.001).listen();
     gui.addColor(controls, 'colorA');
     gui.addColor(controls, 'colorB');
     gui.addColor(controls, 'colorC');
@@ -65,47 +65,47 @@ $(document).ready(function () {
 function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
-    var k = 0;
-    var pCount = 100000;
-    var positions = new Float32Array(pCount * 3);
-
-    for(var j = 0; j < 1; j++) {
-        for(var i = 1; i <= pCount; i++) {
-            var R = 150 + 10*j;
-
-            var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
-            var GA = PHI * Math.PI * 2;           // golden angle
-
-            var lon = GA * i;
-            lon /= Math.PI * 2;
-            lon -= Math.floor(lon);
-            lon *= Math.PI * 2;
-            if (lon > Math.PI) {lon -= Math.PI * 2;}
-            var lat = Math.asin((2 * i) / pCount);
-
-            var x = R * Math.cos(lat) * Math.cos(lon);
-            var y = R * Math.cos(lat) * Math.sin(lon);
-            var z = R * Math.sin(lat);
-
-            positions[ k*3 ] = (isNaN(x)) ? 0.: x;
-            positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
-            positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
-
-            k++;
-        }
-    }
-
-    // hs = new Hexasphere(150, 32, 7.);
-    // var positions = new Float32Array(hs.tiles.length * 3);
     // var k = 0;
-    // console.log(hs.tiles.length);
-    // for(var i=0; i < hs.tiles.length; i++) {
-    //     positions[ i*3 ] = (isNaN(hs.tiles[i].centerPoint.x)) ? 0.: hs.tiles[i].centerPoint.x;
-    //     positions[ i*3+1 ] = (isNaN(hs.tiles[i].centerPoint.y)) ? 0.: hs.tiles[i].centerPoint.y;
-    //     positions[ i*3+2 ] = (isNaN(hs.tiles[i].centerPoint.z)) ? 0.: hs.tiles[i].centerPoint.z;
+    // var pCount = 100000;
+    // var positions = new Float32Array(pCount * 3);
+
+    // for(var j = 0; j < 1; j++) {
+    //     for(var i = 1; i <= pCount; i++) {
+    //         var R = 150 + 10*j;
+
+    //         var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
+    //         var GA = PHI * Math.PI * 2;           // golden angle
+
+    //         var lon = GA * i;
+    //         lon /= Math.PI * 2;
+    //         lon -= Math.floor(lon);
+    //         lon *= Math.PI * 2;
+    //         if (lon > Math.PI) {lon -= Math.PI * 2;}
+    //         var lat = Math.asin((2 * i) / pCount);
+
+    //         var x = R * Math.cos(lat) * Math.cos(lon);
+    //         var y = R * Math.cos(lat) * Math.sin(lon);
+    //         var z = R * Math.sin(lat);
+
+    //         positions[ k*3 ] = (isNaN(x)) ? 0.: x;
+    //         positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
+    //         positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
+
+    //         k++;
+    //     }
     // }
 
-    // new THREE.IcosahedronGeometry([100, 1])
+    hs = new Hexasphere(150, 32, 7.);
+    var positions = new Float32Array(hs.tiles.length * 3);
+    var k = 0;
+    console.log(hs.tiles.length);
+    for(var i=0; i < hs.tiles.length; i++) {
+        positions[ i*3 ] = (isNaN(hs.tiles[i].centerPoint.x)) ? 0.: hs.tiles[i].centerPoint.x;
+        positions[ i*3+1 ] = (isNaN(hs.tiles[i].centerPoint.y)) ? 0.: hs.tiles[i].centerPoint.y;
+        positions[ i*3+2 ] = (isNaN(hs.tiles[i].centerPoint.z)) ? 0.: hs.tiles[i].centerPoint.z;
+    }
+
+    new THREE.IcosahedronGeometry([100, 1])
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     var material = new THREE.ShaderMaterial({
@@ -244,7 +244,7 @@ function generateDomeCloud() {
                 vec3 N = normalize(position);
 
                 float rtime = pow(time + .001, .25);
-                float noise = clamp(rtime * 10., 4., 9.) * turbulence(N + seed) - .7;
+                float noise = clamp(40., 4., 9.) * turbulence(N + seed) - .7;
                 float b = 0.1 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
                 float displacement = noise + b;
                 displacement = pow(abs(noise), 1.1) + b * 3.5;
@@ -262,7 +262,7 @@ function generateDomeCloud() {
                 fV = mvPosition.xyz;
                 fN = N;
 
-                fLDir = normalize(vec3(300, 100, -150));
+                fLDir = normalize(vec3(300, 100, -300));
                 fLDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime * 1.3) * vec4(fLDir, 1.)).xyz;
                 fLDir = normalize(fLDir);
 
@@ -295,13 +295,13 @@ function generateDomeCloud() {
                 float dratio = pow(abs(fDisp / 5.5), 2.5);
                 vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .25), 0.1, 1.));
                 if (fDisp <= waterLevel) {
-                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), .75), 0.1, 1.));
+                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
                     if (intensity > 0.) {
-                        spec = 10. * pow(abs(specr), 10.65);
+                        spec = 10. * pow(abs(specr), 1.5);
                     }
                 }
 
-                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.0, .01, .02)), 1.);
+                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.0)), 1.);
             }
         `,
     });
@@ -331,10 +331,6 @@ function init() {
 }
 
 function animate() {
-    // if (contorls.time < 1.0) {
-    //     requestAnimationFrame(animate);
-    // }
-
     requestAnimationFrame(animate);
     controls.time = 0.00005 * (Date.now() - start);
     uniforms['time'].value = controls.time;
