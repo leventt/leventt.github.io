@@ -378,13 +378,13 @@ function init() {
     pcSphere = generateDomeCloud();
     scene.add(pcSphere);
 
-    var geometry = new THREE.SphereGeometry(170, 32, 32);
+    var geometry = new THREE.SphereGeometry(165, 32, 32);
     var material = new THREE.MeshBasicMaterial({color: 0xbfffe9, transparent: true, opacity: .07});
     var sphere = new THREE.Mesh(geometry, material);
     sphere.scale.set(1, 1, .1);
     scene.add(sphere);
 
-    var geometry = new THREE.SphereGeometry(175, 32, 32);
+    var geometry = new THREE.SphereGeometry(168, 32, 32);
     var material = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .04});
     var sphere = new THREE.Mesh(geometry, material);
     sphere.scale.set(1, 1, .1);
