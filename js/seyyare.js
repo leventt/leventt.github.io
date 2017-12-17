@@ -35,6 +35,20 @@ var Controls = function() {
     this.cloudThinCol = uniforms['cloudThinCol'].value.getHex();
     this.cloudThickCol = uniforms['cloudThickCol'].value.getHex();
     this.resetTime = function() { start = Date.now(); };
+    this.shareableLink = function() {
+        url = location.href;
+        location.href = url.split('?')[0] + '?' + $.param({
+            seed: this.seed,
+            waterLevel: this.waterLevel,
+            showClouds: this.showClouds,
+            shallowWaterCol: this.shallowWaterCol,
+            deepWaterCol: this.deepWaterCol,
+            groundLowCol: this.groundLowCol,
+            groundHighCol: this.groundHighCol,
+            cloudThinCol: this.cloudThinCol,
+            cloudThickCol: this.cloudThickCol
+        });
+    };
 };
 var controls = new Controls();
 
@@ -56,6 +70,32 @@ $(document).ready(function () {
     gui.addColor(controls, 'cloudThinCol');
     gui.addColor(controls, 'cloudThickCol');
     gui.add(controls, 'resetTime');
+    gui.add(controls, 'shareableLink');
+
+    var url = new URL(window.location.href);
+    var seed = url.searchParams.get("seed");
+    if (seed) {controls.seed = seed;}
+    var waterLevel = url.searchParams.get("waterLevel");
+    if (waterLevel) {controls.waterLevel = waterLevel;}
+    var showClouds = url.searchParams.get("showClouds");
+    if (showClouds) {controls.showClouds = showClouds;}
+    var shallowWaterCol = url.searchParams.get("shallowWaterCol");
+    if (shallowWaterCol) {controls.shallowWaterCol = new THREE.Color(parseInt(shallowWaterCol)).getHex();}
+    var deepWaterCol = url.searchParams.get("deepWaterCol");
+    if (deepWaterCol) {controls.deepWaterCol = new THREE.Color(parseInt(deepWaterCol)).getHex();}
+    var groundLowCol = url.searchParams.get("groundLowCol");
+    if (groundLowCol) {controls.groundLowCol = new THREE.Color(parseInt(groundLowCol)).getHex();}
+    var groundHighCol = url.searchParams.get("groundHighCol");
+    if (groundHighCol) {controls.groundHighCol = new THREE.Color(parseInt(groundHighCol)).getHex();}
+    var cloudThinCol = url.searchParams.get("cloudThinCol");
+    if (cloudThinCol) {controls.cloudThinCol = new THREE.Color(parseInt(cloudThinCol)).getHex();}
+    var cloudThickCol = url.searchParams.get("cloudThickCol");
+    if (cloudThickCol) {controls.cloudThickCol = new THREE.Color(parseInt(cloudThickCol)).getHex();}
+
+    for (var i in gui.__controllers) {
+        gui.__controllers[i].updateDisplay();
+    }
+
 
     var contentContainer = document.getElementById('content');
     contentContainer.appendChild(gui.domElement);
