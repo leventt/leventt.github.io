@@ -2,13 +2,13 @@ if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 var renderer, scene, camera;
 var pcSphere;
-var rotateY = new THREE.Matrix4().makeRotationY(0.01);
+var rotateY = new THREE.Matrix4().makeRotationY(0.001);
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 7.},
+    particleSize: {type: "f", value: pointSize * 3.2},
     seed: {type: "f", value: Math.random()},
     waterLevel: {type: "f", value: 3.4},
     colorA: {type: "c", value: new THREE.Color(0x8cf5d1)},
@@ -28,22 +28,25 @@ var Controls = function() {
     this.colorB = uniforms['colorB'].value.getHex();
     this.colorC = uniforms['colorC'].value.getHex();
     this.colorD = uniforms['colorD'].value.getHex();
+    this.resetTime = function() { start = Date.now(); };
 };
 var controls = new Controls();
 
 $(document).ready(function () {
     init();
+    start = Date.now();
 
     gui = new dat.GUI({autoPlace: false});
     gui.closed = true;
     // gui.add(controls, 'time').step(.01).listen();
-    gui.add(controls, 'particleSize', 0., 20.).step(.01);
+    // gui.add(controls, 'particleSize', 0., 20.).step(.01);
     gui.add(controls, 'seed', 0., 100.).step(.001);
     gui.add(controls, 'waterLevel', -1, 10.).step(.001).listen();
     gui.addColor(controls, 'colorA');
     gui.addColor(controls, 'colorB');
     gui.addColor(controls, 'colorC');
     gui.addColor(controls, 'colorD');
+    gui.add(controls, 'resetTime');
 
     var contentContainer = document.getElementById('content');
     contentContainer.appendChild(gui.domElement);
@@ -65,45 +68,46 @@ $(document).ready(function () {
 function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
-    // var k = 0;
-    // var pCount = 100000;
-    // var positions = new Float32Array(pCount * 3);
-
-    // for(var j = 0; j < 1; j++) {
-    //     for(var i = 1; i <= pCount; i++) {
-    //         var R = 150 + 10*j;
-
-    //         var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
-    //         var GA = PHI * Math.PI * 2;           // golden angle
-
-    //         var lon = GA * i;
-    //         lon /= Math.PI * 2;
-    //         lon -= Math.floor(lon);
-    //         lon *= Math.PI * 2;
-    //         if (lon > Math.PI) {lon -= Math.PI * 2;}
-    //         var lat = Math.asin((2 * i) / pCount);
-
-    //         var x = R * Math.cos(lat) * Math.cos(lon);
-    //         var y = R * Math.cos(lat) * Math.sin(lon);
-    //         var z = R * Math.sin(lat);
-
-    //         positions[ k*3 ] = (isNaN(x)) ? 0.: x;
-    //         positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
-    //         positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
-
-    //         k++;
-    //     }
-    // }
-
-    hs = new Hexasphere(150, 32, 7.);
-    var positions = new Float32Array(hs.tiles.length * 3);
     var k = 0;
-    console.log(hs.tiles.length);
-    for(var i=0; i < hs.tiles.length; i++) {
-        positions[ i*3 ] = (isNaN(hs.tiles[i].centerPoint.x)) ? 0.: hs.tiles[i].centerPoint.x;
-        positions[ i*3+1 ] = (isNaN(hs.tiles[i].centerPoint.y)) ? 0.: hs.tiles[i].centerPoint.y;
-        positions[ i*3+2 ] = (isNaN(hs.tiles[i].centerPoint.z)) ? 0.: hs.tiles[i].centerPoint.z;
+    var pCount = 75000;
+    var positions = new Float32Array(pCount * 3);
+
+    for(var j = 0; j < 1; j++) {
+        for(var i = 1; i <= pCount; i++) {
+            var R = 150 + 10*j;
+
+            var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
+            var GA = PHI * Math.PI * 2;           // golden angle
+
+            var lon = GA * i;
+            lon /= Math.PI * 2;
+            lon -= Math.floor(lon);
+            lon *= Math.PI * 2;
+            if (lon > Math.PI) {lon -= Math.PI * 2;}
+            var lat = Math.asin((2 * i) / pCount);
+
+            var x = R * Math.cos(lat) * Math.cos(lon);
+            var y = R * Math.cos(lat) * Math.sin(lon);
+            var z = R * Math.sin(lat);
+
+            positions[ k*3 ] = (isNaN(x)) ? 0.: x;
+            positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
+            positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
+
+            k++;
+        }
     }
+
+    // hs = new Hexasphere(150, 32, 7.);
+    // var positions = new Float32Array(hs.tiles.length * 3);
+    // var k = 0;
+    // console.log(hs.tiles.length);
+    // console.log(hs.tiles);
+    // for(var i=0; i < hs.tiles.length; i++) {
+    //     positions[ i*3 ] = (isNaN(hs.tiles[i].centerPoint.x)) ? 0.: hs.tiles[i].centerPoint.x;
+    //     positions[ i*3+1 ] = (isNaN(hs.tiles[i].centerPoint.y)) ? 0.: hs.tiles[i].centerPoint.y;
+    //     positions[ i*3+2 ] = (isNaN(hs.tiles[i].centerPoint.z)) ? 0.: hs.tiles[i].centerPoint.z;
+    // }
 
     new THREE.IcosahedronGeometry([100, 1])
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -295,19 +299,18 @@ function generateDomeCloud() {
                 float dratio = pow(abs(fDisp / 5.5), 2.5);
                 vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .25), 0.1, 1.));
                 if (fDisp <= waterLevel) {
-                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
+                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), .85), 0.1, 1.));
                     if (intensity > 0.) {
-                        spec = 10. * pow(abs(specr), 1.5);
+                        spec = .35 * pow(abs(specr), 1.5);
                     }
                 }
 
-                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.0)), 1.);
+                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.01, .02, .03)), 1.);
             }
         `,
     });
-    var pointcloud = new THREE.Points(geometry, material);
 
-    return pointcloud;
+    return new THREE.Points(geometry, material);
 }
 
 function init() {
@@ -324,6 +327,18 @@ function init() {
     pcSphere = generateDomeCloud();
     scene.add(pcSphere);
 
+    var geometry = new THREE.SphereGeometry(170, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0xbfffe9, transparent: true, opacity: .05});
+    var sphere = new THREE.Mesh(geometry, material);
+    sphere.scale.set(1, 1, .1);
+    scene.add(sphere);
+
+    var geometry = new THREE.SphereGeometry(175, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .02});
+    var sphere = new THREE.Mesh(geometry, material);
+    sphere.scale.set(1, 1, .1);
+    scene.add(sphere);
+
     renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
     renderer.setSize(bsize, bsize);
     renderer.setPixelRatio(pratio);
@@ -332,6 +347,9 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
+
+    // pcSphere.applyMatrix(rotateY);
+
     controls.time = 0.00005 * (Date.now() - start);
     uniforms['time'].value = controls.time;
     uniforms['particleSize'].value = controls.particleSize;
