@@ -8,13 +8,13 @@ var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 2.6},
+    particleSize: {type: "f", value: pointSize * 3.1},
     seed: {type: "f", value: Math.random()},
     waterLevel: {type: "f", value: 3.4},
-    colorA: {type: "c", value: new THREE.Color(0x14395d)},
-    colorB: {type: "c", value: new THREE.Color(0x8ac3da)},
-    colorC: {type: "c", value: new THREE.Color(0x173a1a)},
-    colorD: {type: "c", value: new THREE.Color(0xfdfcd7)}
+    colorA: {type: "c", value: new THREE.Color(0x8cf5d1)},
+    colorB: {type: "c", value: new THREE.Color(0x416573)},
+    colorC: {type: "c", value: new THREE.Color(0x2b3043)},
+    colorD: {type: "c", value: new THREE.Color(0x787456)}
 };
 var start = Date.now();
 var once = true;
@@ -247,7 +247,7 @@ function generateDomeCloud() {
                 float noise = clamp(rtime * 10., 4., 9.) * turbulence(N + seed) - .7;
                 float b = 0.1 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
                 float displacement = noise + b;
-                displacement = pow(abs(noise), 1.1) + b * .15;
+                displacement = pow(abs(noise), 1.1) + b * 3.5;
                 displacement = clamp(displacement, 0., 10.);
 
                 if (displacement <= 1.) {
@@ -292,16 +292,16 @@ function generateDomeCloud() {
                 }
 
                 float ratio = dot(normalize(fV), normalize(fN));
-                float dratio = pow(abs(fDisp / 5.5), 1.5);
-                vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .45), 0.1, 1.));
+                float dratio = pow(abs(fDisp / 5.5), 2.5);
+                vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .25), 0.1, 1.));
                 if (fDisp <= waterLevel) {
-                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), 1.5), 0.1, 1.));
+                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), .75), 0.1, 1.));
                     if (intensity > 0.) {
-                        spec = .7 * pow(abs(specr), 3.65);
+                        spec = 10. * pow(abs(specr), 10.65);
                     }
                 }
 
-                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(-.2, -.1, -.05)), 1.);
+                gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.0, .01, .02)), 1.);
             }
         `,
     });
