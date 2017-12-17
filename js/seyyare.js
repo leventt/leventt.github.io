@@ -7,17 +7,17 @@ var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 400;
 var pointSize = pratio;
 var uniforms = {
-    time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 3.1},
-    seed: {type: "f", value: Math.random()},
-    waterLevel: {type: "f", value: 3.4},
-    showClouds: {type: "b", value: true},
-    shallowWaterCol: {type: "c", value: new THREE.Color(0x8cf5d1)},
-    deepWaterCol: {type: "c", value: new THREE.Color(0x196a89)},
-    groundLowCol: {type: "c", value: new THREE.Color(0x51107)},
-    groundHighCol: {type: "c", value: new THREE.Color(0xcac491)},
-    cloudThinCol: {type: "c", value: new THREE.Color(0x96bdc5)},
-    cloudThickCol: {type: "c", value: new THREE.Color(0xe5faff)}
+    time: {type: 'f', value: 0.0},
+    particleSize: {type: 'f', value: pointSize * 3.1},
+    seed: {type: 'f', value: Math.random()},
+    waterLevel: {type: 'f', value: 3.4},
+    showClouds: {type: 'b', value: true},
+    shallowWaterCol: {type: 'c', value: new THREE.Color(0x8cf5d1)},
+    deepWaterCol: {type: 'c', value: new THREE.Color(0x196a89)},
+    groundLowCol: {type: 'c', value: new THREE.Color(0x51107)},
+    groundHighCol: {type: 'c', value: new THREE.Color(0xcac491)},
+    cloudThinCol: {type: 'c', value: new THREE.Color(0x96bdc5)},
+    cloudThickCol: {type: 'c', value: new THREE.Color(0xe5faff)}
 };
 var start = Date.now();
 var once = true;
@@ -73,23 +73,23 @@ $(document).ready(function () {
     gui.add(controls, 'shareableLink');
 
     var url = new URL(window.location.href);
-    var seed = url.searchParams.get("seed");
+    var seed = url.searchParams.get('seed');
     if (seed) {controls.seed = seed;}
-    var waterLevel = url.searchParams.get("waterLevel");
+    var waterLevel = url.searchParams.get('waterLevel');
     if (waterLevel) {controls.waterLevel = waterLevel;}
-    var showClouds = url.searchParams.get("showClouds");
-    if (showClouds) {controls.showClouds = showClouds;}
-    var shallowWaterCol = url.searchParams.get("shallowWaterCol");
+    var showClouds = url.searchParams.get('showClouds');
+    if (showClouds) {controls.showClouds = showClouds.toString() == 'true' ? true : false;}
+    var shallowWaterCol = url.searchParams.get('shallowWaterCol');
     if (shallowWaterCol) {controls.shallowWaterCol = new THREE.Color(parseInt(shallowWaterCol)).getHex();}
-    var deepWaterCol = url.searchParams.get("deepWaterCol");
+    var deepWaterCol = url.searchParams.get('deepWaterCol');
     if (deepWaterCol) {controls.deepWaterCol = new THREE.Color(parseInt(deepWaterCol)).getHex();}
-    var groundLowCol = url.searchParams.get("groundLowCol");
+    var groundLowCol = url.searchParams.get('groundLowCol');
     if (groundLowCol) {controls.groundLowCol = new THREE.Color(parseInt(groundLowCol)).getHex();}
-    var groundHighCol = url.searchParams.get("groundHighCol");
+    var groundHighCol = url.searchParams.get('groundHighCol');
     if (groundHighCol) {controls.groundHighCol = new THREE.Color(parseInt(groundHighCol)).getHex();}
-    var cloudThinCol = url.searchParams.get("cloudThinCol");
+    var cloudThinCol = url.searchParams.get('cloudThinCol');
     if (cloudThinCol) {controls.cloudThinCol = new THREE.Color(parseInt(cloudThinCol)).getHex();}
-    var cloudThickCol = url.searchParams.get("cloudThickCol");
+    var cloudThickCol = url.searchParams.get('cloudThickCol');
     if (cloudThickCol) {controls.cloudThickCol = new THREE.Color(parseInt(cloudThickCol)).getHex();}
 
     for (var i in gui.__controllers) {
@@ -110,8 +110,8 @@ $(document).ready(function () {
     uniforms['time'].value = controls.time;
     animate();
 
-    $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
-    $("div.hiddencontent").fadeIn(30000).removeClass("hiddencontent");
+    $('div.hiddenlogo').fadeIn(8000).removeClass('hiddenlogo');
+    $('div.hiddencontent').fadeIn(30000).removeClass('hiddencontent');
 });
 
 function generateDomeCloud() {
