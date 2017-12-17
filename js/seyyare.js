@@ -4,11 +4,11 @@ var renderer, scene, camera;
 var pcSphere;
 var rotateY = new THREE.Matrix4().makeRotationY(0.001);
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-var bsize = 400;
+var bsize = 300;
 var pointSize = pratio;
 var uniforms = {
     time: {type: 'f', value: 0.0},
-    particleSize: {type: 'f', value: pointSize * 3.1},
+    particleSize: {type: 'f', value: pointSize * 3.5},
     seed: {type: 'f', value: Math.random()},
     waterLevel: {type: 'f', value: 3.4},
     showClouds: {type: 'b', value: true},
