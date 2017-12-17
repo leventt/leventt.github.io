@@ -14,8 +14,8 @@ var uniforms = {
     showClouds: {type: "b", value: true},
     shallowWaterCol: {type: "c", value: new THREE.Color(0x8cf5d1)},
     deepWaterCol: {type: "c", value: new THREE.Color(0x196a89)},
-    groundLowCol: {type: "c", value: new THREE.Color(0x1b2f1e)},
-    groundHighCol: {type: "c", value: new THREE.Color(0x787456)},
+    groundLowCol: {type: "c", value: new THREE.Color(0x51107)},
+    groundHighCol: {type: "c", value: new THREE.Color(0xcac491)},
     cloudThinCol: {type: "c", value: new THREE.Color(0x96bdc5)},
     cloudThickCol: {type: "c", value: new THREE.Color(0xe5faff)}
 };
