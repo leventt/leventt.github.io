@@ -4,17 +4,20 @@ var renderer, scene, camera;
 var pcSphere;
 var rotateY = new THREE.Matrix4().makeRotationY(0.001);
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-var bsize = 300;
+var bsize = 400;
 var pointSize = pratio;
 var uniforms = {
     time: {type: "f", value: 0.0},
-    particleSize: {type: "f", value: pointSize * 3.2},
+    particleSize: {type: "f", value: pointSize * 3.1},
     seed: {type: "f", value: Math.random()},
     waterLevel: {type: "f", value: 3.4},
-    colorA: {type: "c", value: new THREE.Color(0x8cf5d1)},
-    colorB: {type: "c", value: new THREE.Color(0x196a89)},
-    colorC: {type: "c", value: new THREE.Color(0x1b2f1e)},
-    colorD: {type: "c", value: new THREE.Color(0x787456)}
+    showClouds: {type: "b", value: true},
+    shallowWaterCol: {type: "c", value: new THREE.Color(0x8cf5d1)},
+    deepWaterCol: {type: "c", value: new THREE.Color(0x196a89)},
+    groundLowCol: {type: "c", value: new THREE.Color(0x1b2f1e)},
+    groundHighCol: {type: "c", value: new THREE.Color(0x787456)},
+    cloudThinCol: {type: "c", value: new THREE.Color(0x96bdc5)},
+    cloudThickCol: {type: "c", value: new THREE.Color(0xe5faff)}
 };
 var start = Date.now();
 var once = true;
@@ -24,10 +27,13 @@ var Controls = function() {
     this.particleSize = uniforms['particleSize'].value;
     this.seed = uniforms['seed'].value;
     this.waterLevel = uniforms['waterLevel'].value;
-    this.colorA = uniforms['colorA'].value.getHex();
-    this.colorB = uniforms['colorB'].value.getHex();
-    this.colorC = uniforms['colorC'].value.getHex();
-    this.colorD = uniforms['colorD'].value.getHex();
+    this.showClouds = uniforms['showClouds'].value;
+    this.shallowWaterCol = uniforms['shallowWaterCol'].value.getHex();
+    this.deepWaterCol = uniforms['deepWaterCol'].value.getHex();
+    this.groundLowCol = uniforms['groundLowCol'].value.getHex();
+    this.groundHighCol = uniforms['groundHighCol'].value.getHex();
+    this.cloudThinCol = uniforms['cloudThinCol'].value.getHex();
+    this.cloudThickCol = uniforms['cloudThickCol'].value.getHex();
     this.resetTime = function() { start = Date.now(); };
 };
 var controls = new Controls();
@@ -41,11 +47,14 @@ $(document).ready(function () {
     // gui.add(controls, 'time').step(.01).listen();
     // gui.add(controls, 'particleSize', 0., 20.).step(.01);
     gui.add(controls, 'seed', 0., 100.).step(.001);
-    gui.add(controls, 'waterLevel', -1, 10.).step(.001).listen();
-    gui.addColor(controls, 'colorA');
-    gui.addColor(controls, 'colorB');
-    gui.addColor(controls, 'colorC');
-    gui.addColor(controls, 'colorD');
+    gui.add(controls, 'waterLevel', -1, 10.).step(.001);
+    gui.add(controls, 'showClouds');
+    gui.addColor(controls, 'shallowWaterCol');
+    gui.addColor(controls, 'deepWaterCol');
+    gui.addColor(controls, 'groundLowCol');
+    gui.addColor(controls, 'groundHighCol');
+    gui.addColor(controls, 'cloudThinCol');
+    gui.addColor(controls, 'cloudThickCol');
     gui.add(controls, 'resetTime');
 
     var contentContainer = document.getElementById('content');
@@ -69,12 +78,14 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 75000;
-    var positions = new Float32Array(pCount * 3);
+    var lCount = 2;
+    var pCount = 150000;
+    var positions = new Float32Array(pCount * lCount * 3);
+    var layer = new Float32Array(pCount * lCount);
 
-    for(var j = 0; j < 1; j++) {
+    for(var j = 0; j < lCount; j++) {
         for(var i = 1; i <= pCount; i++) {
-            var R = 150 + 10*j;
+            var R = 150;
 
             var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
             var GA = PHI * Math.PI * 2;           // golden angle
@@ -93,6 +104,7 @@ function generateDomeCloud() {
             positions[ k*3 ] = (isNaN(x)) ? 0.: x;
             positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
             positions[ k*3+2 ] = (isNaN(z)) ? 0.: z;
+            layer[k] = j;
 
             k++;
         }
@@ -111,10 +123,12 @@ function generateDomeCloud() {
 
     new THREE.IcosahedronGeometry([100, 1])
     geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.addAttribute('layer', new THREE.BufferAttribute(layer, 1));
 
     var material = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: `
+            attribute float layer;
             uniform float waterLevel;
             uniform float time;
             uniform float particleSize;
@@ -123,6 +137,7 @@ function generateDomeCloud() {
             varying vec3 fV;
             varying float fDisp;
             varying vec3 fLDir;
+            varying float fLayer;
 
             // https://github.com/ashima/webgl-noise
             vec3 mod289(vec3 x)
@@ -246,20 +261,33 @@ function generateDomeCloud() {
 
             void main() {
                 vec3 N = normalize(position);
+                vec3 lposition = position;
+                if (layer == 1.) {
+                    lposition = lposition + (N * 2.);
+                }
 
                 float rtime = pow(time + .001, .25);
                 float noise = clamp(40., 4., 9.) * turbulence(N + seed) - .7;
-                float b = 0.1 * pnoise(0.5 * position + vec3(2.0 * seed), vec3(10000.));
+                float b = 0.1 * pnoise(0.5 * lposition + vec3(2.0 * seed), vec3(10000.));
                 float displacement = noise + b;
                 displacement = pow(abs(noise), 1.1) + b * 3.5;
                 displacement = clamp(displacement, 0., 10.);
+
+                if (layer == 1.) {
+                    rtime = pow(time + .001, .25);
+                    noise = clamp(40., 4., 9.) * turbulence(N + rtime + seed + .3) - .7;
+                    b = 0.1 * pnoise(0.5 * lposition + vec3(2.0 * rtime  + seed + .4), vec3(10000.));
+                    displacement = noise + b;
+                    displacement = pow(abs(noise), 1.1) + b * 3.5;
+                    displacement = clamp(displacement, 0., 10.);
+                }
 
                 if (displacement <= 1.) {
                     float nW = turbulence(N + rtime);
                     displacement += nW * .1;
                 }
 
-                vec3 newPosition = position + N * displacement;
+                vec3 newPosition = lposition + N * displacement;
                 fDisp = displacement;
 
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
@@ -270,20 +298,31 @@ function generateDomeCloud() {
                 fLDir = (rotationMatrix(normalize(vec3(-.3, 1., -.1)), rtime * 1.3) * vec4(fLDir, 1.)).xyz;
                 fLDir = normalize(fLDir);
 
+                fLayer = layer;
+
                 gl_PointSize = particleSize;
+                if (layer == 1.) {
+                    float cloudAmount = (waterLevel + 1.) / 11.0;
+                    float dratio = pow(abs(fDisp / mix(4., 20., cloudAmount)), 1.8);
+                    gl_PointSize = particleSize / mix(2.85, .35, clamp(dratio, 0., 1.));
+                }
                 gl_Position = projectionMatrix * mvPosition;
             }
         `,
         fragmentShader: `
-            uniform vec3 colorA;
-            uniform vec3 colorB;
-            uniform vec3 colorC;
-            uniform vec3 colorD;
+            uniform vec3 shallowWaterCol;
+            uniform vec3 deepWaterCol;
+            uniform vec3 groundLowCol;
+            uniform vec3 groundHighCol;
+            uniform vec3 cloudThinCol;
+            uniform vec3 cloudThickCol;
             uniform float waterLevel;
             varying vec3 fN;
             varying vec3 fV;
             varying float fDisp;
             varying vec3 fLDir;
+            varying float fLayer;
+            uniform bool showClouds;
 
             void main() {
                 float intensity = max(dot(fN, fLDir), 0.0);
@@ -297,12 +336,24 @@ function generateDomeCloud() {
 
                 float ratio = dot(normalize(fV), normalize(fN));
                 float dratio = pow(abs(fDisp / 5.5), 2.5);
-                vec3 diffuse = mix(vec3(.7, .8, .9), mix(colorC, colorD, dratio), clamp(pow(abs(ratio), .25), 0.1, 1.));
+                vec3 diffuse = mix(vec3(.7, .8, .9), mix(groundLowCol, groundHighCol, dratio), clamp(pow(abs(ratio), .25), 0.1, 1.));
                 if (fDisp <= waterLevel) {
-                    diffuse = mix(vec3(1.), mix(colorB, colorA, dratio), clamp(pow(abs(ratio), .85), 0.1, 1.));
+                    diffuse = mix(vec3(1.), mix(deepWaterCol, shallowWaterCol, dratio), clamp(pow(abs(ratio), .85), 0.1, 1.));
+                    if (intensity > 0.) {
+                        spec = .35 * pow(abs(specr), 1.);
+                    }
+                }
+
+                if (fLayer == 1.) {
+                    float cloudAmount = (waterLevel + 1.) / 11.0;
+                    float dratio = pow(abs(fDisp / mix(4., 20., cloudAmount)), 1.8);
+                    vec3 filter = mix(vec3(0.), vec3(1.), dratio);
                     if (intensity > 0.) {
                         spec = .35 * pow(abs(specr), 1.5);
                     }
+                    if (length(filter) < 0.5) discard;
+                    if (!showClouds) discard;
+                    diffuse = mix(cloudThinCol, cloudThickCol, dratio);
                 }
 
                 gl_FragColor = vec4(max(intensity * diffuse + spec, vec3(.01, .02, .03)), 1.);
@@ -328,13 +379,13 @@ function init() {
     scene.add(pcSphere);
 
     var geometry = new THREE.SphereGeometry(170, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xbfffe9, transparent: true, opacity: .05});
+    var material = new THREE.MeshBasicMaterial({color: 0xbfffe9, transparent: true, opacity: .07});
     var sphere = new THREE.Mesh(geometry, material);
     sphere.scale.set(1, 1, .1);
     scene.add(sphere);
 
     var geometry = new THREE.SphereGeometry(175, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .02});
+    var material = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: .04});
     var sphere = new THREE.Mesh(geometry, material);
     sphere.scale.set(1, 1, .1);
     scene.add(sphere);
@@ -348,17 +399,18 @@ function init() {
 function animate() {
     requestAnimationFrame(animate);
 
-    // pcSphere.applyMatrix(rotateY);
-
     controls.time = 0.00005 * (Date.now() - start);
     uniforms['time'].value = controls.time;
     uniforms['particleSize'].value = controls.particleSize;
     uniforms['seed'].value = controls.seed;
     uniforms['waterLevel'].value = controls.waterLevel;
-    uniforms['colorA'].value.set(controls.colorA);
-    uniforms['colorB'].value.set(controls.colorB);
-    uniforms['colorC'].value.set(controls.colorC);
-    uniforms['colorD'].value.set(controls.colorD);
+    uniforms['showClouds'].value = controls.showClouds;
+    uniforms['shallowWaterCol'].value.set(controls.shallowWaterCol);
+    uniforms['deepWaterCol'].value.set(controls.deepWaterCol);
+    uniforms['groundLowCol'].value.set(controls.groundLowCol);
+    uniforms['groundHighCol'].value.set(controls.groundHighCol);
+    uniforms['cloudThinCol'].value.set(controls.cloudThinCol);
+    uniforms['cloudThickCol'].value.set(controls.cloudThickCol);
 
     render();
 }
