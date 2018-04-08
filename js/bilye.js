@@ -35,15 +35,15 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 7759;
+    var pCount = 8192;
 
     var positions = new Float32Array(pCount * 3);
     var sizes = new Float32Array(pCount);
     var layer = new Float32Array(pCount);
 
     for(var j = 0; j < 1; j++) {
-        for(var i = 1; i <= pCount; i++) {
-            var R = 150 + 10*j;
+        for(var i = 0; i < pCount; i++) {
+            var R = 150 + 10 * j;
 
             var PHI = (Math.sqrt(5)+1)/2 - 1;     // golden ratio
             var GA = PHI * Math.PI * 2;           // golden angle
@@ -53,13 +53,13 @@ function generateDomeCloud() {
             lon -= Math.floor(lon);
             lon *= Math.PI * 2;
             if (lon > Math.PI) {lon -= Math.PI * 2;}
-            var lat = Math.asin((2 * i) / pCount);
+            var lat = Math.asin(i / (pCount + 32.));
 
             var x = R * Math.cos(lat) * Math.cos(lon);
             var y = R * Math.cos(lat) * Math.sin(lon);
             var z = R * Math.sin(lat);
 
-            sizes[ k ] = pointSize * 4.5;
+            sizes[ k ] = pointSize * 2.1;
             layer[ k ] = j;
             positions[ k*3 ] = (isNaN(x)) ? 0.: x;
             positions[ k*3+1 ] = (isNaN(y)) ? 0.: y;
@@ -223,7 +223,7 @@ function generateDomeCloud() {
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
 
-                gl_FragColor = mix(vec4(1, 1, 1, 1.2),vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5)) * texture2D(texture, gl_PointCoord);
+                gl_FragColor = mix(vec4(1, 1, 1, 3.2),vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5)) * texture2D(texture, gl_PointCoord);
                 if (gl_FragColor.a < 0.8 && (fSize/5.5) >= 1.0) discard;
                 if (gl_FragColor.a < 0.5 && (fSize/5.5) < 1.0) discard;
             }
