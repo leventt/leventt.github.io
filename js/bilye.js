@@ -2,40 +2,43 @@ if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 var renderer, scene, camera;
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
-var bsize = 200;
+var bsize = 100;
 var pointSize = pratio;
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var uniforms = {
     time:    { type: "f", value: 0.0 },
-    color:   { type: "c", value: new THREE.Color(0xffffff) },
-    texture: { type: "t", value: null }
+    color:   { type: "c", value: new THREE.Color(0xffffff) }
 };
 var start = Date.now();
-var once = true;
 
-var loader = new THREE.TextureLoader();
-loader.load('res/particle.png', function (texture) {
-    uniforms.texture.value = texture;
-    init();
+init();
+render();
 
-    render();
-
-    if (! once) { return; }
-    once = false;
+function resetTime() {
     start = Date.now();
     uniforms[ 'time' ].value = 0.00025 * (Date.now() - start);
-    animate();
-    $(document).ready(function () {
-        $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
-        $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
-    });
+}
+
+resetTime();
+animate();
+$(document).ready(function () {
+    $("div.hiddenlogo").fadeIn(8000).removeClass("hiddenlogo");
+    $("div.hiddencontent").fadeIn(10000).removeClass("hiddencontent");
+});
+
+renderer.domElement.addEventListener('click', function(e) {
+    if (uniforms[ 'time' ].value >= 1.0) {
+        resetTime();
+        animate();
+    }
+    console.log(uniforms[ 'time' ].value);
 });
 
 function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 8192;
+    var pCount = 1024;
 
     var positions = new Float32Array(pCount * 3);
     var sizes = new Float32Array(pCount);
@@ -53,7 +56,7 @@ function generateDomeCloud() {
             lon -= Math.floor(lon);
             lon *= Math.PI * 2;
             if (lon > Math.PI) {lon -= Math.PI * 2;}
-            var lat = Math.asin(i / (pCount + 32.));
+            var lat = Math.asin(i / (pCount));
 
             var x = R * Math.cos(lat) * Math.cos(lon);
             var y = R * Math.cos(lat) * Math.sin(lon);
@@ -82,7 +85,6 @@ function generateDomeCloud() {
             attribute float layer;
             varying vec3 fN;
             varying vec3 fV;
-            varying float fSize;
             varying float fDisp;
 
             // https://github.com/ashima/webgl-noise
@@ -205,7 +207,6 @@ function generateDomeCloud() {
 
                 fN = N;
                 fV = -vec3(modelViewMatrix*vec4(newPosition, 1.0));
-                fSize = size;
                 fDisp = displacement;
 
                 vec4 mvPosition = modelViewMatrix * vec4(newPosition, 1.0);
@@ -214,18 +215,13 @@ function generateDomeCloud() {
             }
         `,
         fragmentShader: `
-            uniform sampler2D texture;
             varying vec3 fN;
             varying vec3 fV;
-            varying float fSize;
             varying float fDisp;
 
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
-
-                gl_FragColor = mix(vec4(1, 1, 1, 3.2),vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5)) * texture2D(texture, gl_PointCoord);
-                if (gl_FragColor.a < 0.8 && (fSize/5.5) >= 1.0) discard;
-                if (gl_FragColor.a < 0.5 && (fSize/5.5) < 1.0) discard;
+                gl_FragColor = mix(vec4(.5, .5, .5, 1), vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5));
             }
         `,
     });
@@ -248,7 +244,7 @@ function init() {
     scene.add(pcSphere);
 
     var geometry = new THREE.SphereGeometry(165, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0xaaaaaa});
+    var material = new THREE.MeshBasicMaterial({color: 0xcccccc});
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
