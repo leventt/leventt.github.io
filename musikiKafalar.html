@@ -1,43 +1,50 @@
 <!doctype html>
 <html>
-    <head>
-        <title>musikiKafalar. ♫</title>
-        <meta name="theme-color" content="#888888">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-        <link rel="shortcut icon" href="res/favicon.ico">
-    </head>
 
-    <body>
-        <div id="logotext">
-            <div class="hiddenlogo", id="logo">musikiKafalar.</div>
+<head>
+    <title>musikiKafalar. ♫</title>
+    <meta name="theme-color" content="#888888">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="res/favicon.ico">
+</head>
+
+<body>
+    <!-- https://stackoverflow.com/questions/50490304/how-to-make-audio-autoplay-on-chrome -->
+    <iframe src="res/silence.mp3" allow="autoplay" id="audio" style="display:none"></iframe>
+    <div id="logotext">
+        <div class="hiddenlogo" , id="logo">musikiKafalar.</div>
+    </div>
+    <div id="outer">
+        <div id="canvas">
+            <div id="loading">loading...</div>
         </div>
-        <div id="outer"><div id="canvas"><div id="loading">loading...</div></div></div>
-        <div class="hiddencontent", id="nav">
+    </div>
+    <div class="hiddencontent" , id="nav">
         <a onclick="replay()" href="javascript:void(0);">baştan // replay</a>
         <br>
         <a href="/">geri // back</a></div>
-        <div class="hiddencontent", id="content">
+    <div class="hiddencontent" , id="content">
         [♫]
-        </div>
-        <div class="hiddeninfo", id="content">
+    </div>
+    <div class="hiddeninfo" , id="content">
         sürükle // drag
-        </div>
-        <script src="external/js/jquery-1.12.0.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                $("div.hiddenlogo").fadeIn(1000).removeClass("hiddenlogo");
-                $("div.hiddencontent").fadeIn(2000).removeClass("hiddencontent");
-                $("div.hiddeninfo").fadeIn(20000).removeClass("hiddencontent");
-            });
-        </script>
-        <script src="external/js/three.min.js"></script>
-        <script src="external/js/Detector.js"></script>
-        <script src="external/js/OrbitControls.js"></script>
-        <script src="external/js/OBJLoader.js"></script>
-        <script src="external/js/timbre.js"></script>
-        <script type="x-shader/x-vertex" id="vShaderHeadshot">
+    </div>
+    <script src="external/js/jquery-1.12.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("div.hiddenlogo").fadeIn(1000).removeClass("hiddenlogo");
+            $("div.hiddencontent").fadeIn(2000).removeClass("hiddencontent");
+            $("div.hiddeninfo").fadeIn(20000).removeClass("hiddencontent");
+        });
+    </script>
+    <script src="external/js/three.min.js"></script>
+    <script src="external/js/Detector.js"></script>
+    <script src="external/js/OrbitControls.js"></script>
+    <script src="external/js/OBJLoader.js"></script>
+    <script src="external/js/timbre.js"></script>
+    <script type="x-shader/x-vertex" id="vShaderHeadshot">
             // https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader
             uniform float time;
             varying vec3 e;
@@ -51,7 +58,7 @@
 
             }
         </script>
-        <script type="x-shader/x-vertex" id="fShaderHeadshot">
+    <script type="x-shader/x-vertex" id="fShaderHeadshot">
             // https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader
             uniform float time;
             uniform sampler2D tMatCap;
@@ -70,171 +77,171 @@
 
             }
         </script>
-        <script>
-            if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+    <script>
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-            var renderer, scene, camera;
-            var tloader = new THREE.TextureLoader();
-            var uniformsHeadshot = {
-                time:    { type: "f", value: 0.0 },
-                tMatCap: { type: "t", value: null }
-            };
-            var uniformsCloud = {
-                time:    { type: "f", value: 0.0 },
-                texture: { type: "t", value: null }
-            };
-            var start = Date.now();
-            var musiki, tCursor;
-            var dragX;
+        var renderer, scene, camera;
+        var tloader = new THREE.TextureLoader();
+        var uniformsHeadshot = {
+            time: { type: "f", value: 0.0 },
+            tMatCap: { type: "t", value: null }
+        };
+        var uniformsCloud = {
+            time: { type: "f", value: 0.0 },
+            texture: { type: "t", value: null }
+        };
+        var start = Date.now();
+        var musiki, tCursor;
+        var dragX;
 
-            init();
+        init();
 
-            function init() {
+        function init() {
 
-                tloader.load( 'res/headshot/headshot.png', function (texture) {
+            tloader.load('res/headshot/headshot.png', function (texture) {
 
-                    container = document.getElementById( 'canvas' );
-                    scene = new THREE.Scene();
-                    scene.fog = new THREE.Fog( 0xcccccc, 0.001, 10000. );
+                container = document.getElementById('canvas');
+                scene = new THREE.Scene();
+                scene.fog = new THREE.Fog(0xcccccc, 0.001, 10000.);
 
-                    camera = new THREE.PerspectiveCamera( 20, 1.0, 0.001, 10000 );
-                    camera.applyMatrix( new THREE.Matrix4().makeTranslation( 0, 0, 400 ) );
+                camera = new THREE.PerspectiveCamera(20, 1.0, 0.001, 10000);
+                camera.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, 400));
 
-                    uniformsHeadshot.tMatCap.value = texture;
+                uniformsHeadshot.tMatCap.value = texture;
 
-                    var material = new THREE.ShaderMaterial( {
-                        uniforms: uniformsHeadshot,
-                        vertexShader: document.getElementById( 'vShaderHeadshot' ).textContent,
-                        fragmentShader: document.getElementById( 'fShaderHeadshot' ).textContent,
-                        shading: THREE.SmoothShading,
-                    });
+                var material = new THREE.ShaderMaterial({
+                    uniforms: uniformsHeadshot,
+                    vertexShader: document.getElementById('vShaderHeadshot').textContent,
+                    fragmentShader: document.getElementById('fShaderHeadshot').textContent,
+                    shading: THREE.SmoothShading,
+                });
 
-                    material.uniforms.tMatCap.value.wrapS =
+                material.uniforms.tMatCap.value.wrapS =
                     material.uniforms.tMatCap.value.wrapT =
                     THREE.ClampToEdgeWrapping;
 
-                    var loader = new THREE.OBJLoader();
-                    loader.load( 'res/headshot/headshot.obj', function ( obj ) {
-                        obj.traverse( function ( child ) {
-                            if ( child instanceof THREE.Mesh ) {
-                                child.material = material;
-                            }
-                        });
-                        scene.add( obj );
+                var loader = new THREE.OBJLoader();
+                loader.load('res/headshot/headshot.obj', function (obj) {
+                    obj.traverse(function (child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.material = material;
+                        }
+                    });
+                    scene.add(obj);
 
-                            // renderer
+                    // renderer
 
-                        renderer = Detector.webgl ? new THREE.WebGLRenderer( { alpha: true, antialiasing: true } ) : new THREE.CanvasRenderer( { alpha: true, antialiasing: true } );
-                        renderer.setSize( 333, 333 );
-                        renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
-                        container.appendChild( renderer.domElement );
+                    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
+                    renderer.setSize(333, 333);
+                    renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
+                    container.appendChild(renderer.domElement);
 
-                        controls = new THREE.OrbitControls( camera, renderer.domElement );
-                        controls.enableDamping = true;
-                        controls.dampingFactor = 1.;
-                        controls.enableZoom = false;
-                        controls.enablePan = false;
-                        controls.minPolarAngle = Math.PI / 360. * 190.;
-                        controls.maxPolarAngle = Math.PI / 360. * 190.;
-                        controls.minAzimuthAngle = Math.PI / 360. * -60.;
-                        controls.maxAzimuthAngle = Math.PI / 360. * 60.;
+                    controls = new THREE.OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = true;
+                    controls.dampingFactor = 1.;
+                    controls.enableZoom = false;
+                    controls.enablePan = false;
+                    controls.minPolarAngle = Math.PI / 360. * 190.;
+                    controls.maxPolarAngle = Math.PI / 360. * 190.;
+                    controls.minAzimuthAngle = Math.PI / 360. * -60.;
+                    controls.maxAzimuthAngle = Math.PI / 360. * 60.;
 
-                        uniformsHeadshot[ 'time' ].value = 0.00025 * ( Date.now() - start );
+                    uniformsHeadshot['time'].value = 0.00025 * (Date.now() - start);
 
-                        T("audio").load("res/headshot/headshot.wav", function() {
-                            document.getElementById( 'loading' ).innerHTML = "";
+                    T("audio").load("res/headshot/headshot.wav", function () {
+                        document.getElementById('loading').innerHTML = "";
 
-                            musiki = this;
-                            tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
-                                tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
-                                    tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
-                                }).linTo(musiki.duration, musiki.duration);
-                            }).sinTo(0., musiki.duration/5.);
-                            musiki.set({currentTime:tCursor}).play();
+                        musiki = this;
+                        tCursor = T("param", { value: musiki.duration, ar: true }).on("ended", function () {
+                            tCursor.sinTo(musiki.duration / 4. * 3., musiki.duration / 3.).on("ended", function () {
+                                tCursor.sinTo(musiki.duration / 4. * 3., musiki.duration / 3.);
+                            }).linTo(musiki.duration, musiki.duration);
+                        }).sinTo(0., musiki.duration / 5.);
+                        musiki.set({ currentTime: tCursor }).play();
 
-                            animate();
-                        });
+                        animate();
                     });
                 });
-            }
-
-            function animate() {
-
-                requestAnimationFrame(animate);
-
-                controls.constraint.rotateLeft((controls.getAzimuthalAngle() - Math.PI / -360. * ((tCursor.value/musiki.duration * 120.) - 60.)));
-                controls.update();
-
-                render();
-
-            }
-
-            function render() {
-
-                camera.updateMatrixWorld();
-                renderer.render( scene, camera );
-
-                uniformsHeadshot[ 'time' ].value = 0.00025 * ( Date.now() - start );
-
-            }
-
-            // https://gist.github.com/kujon/2781489
-            (function(){Math.clamp=function(a,b,c){return Math.max(b,Math.min(c,a));}})();
-
-            $("body").on('touchstart mousedown', function(event) {
-                document.body.style.cursor = 'col-resize';
-                var pageX;
-                switch(event.type) {
-                    case "touchstart":
-                        pageX = event.originalEvent.touches[0].pageX;
-                        break;
-                    case "mousedown":
-                        pageX = event.pageX;
-                        break;
-                    default:
-                        return;
-                }
-
-                dragX = pageX;
-                musiki.pause();
             });
-            $("body").on('touchend mouseup', function(event) {
-                document.body.style.cursor = 'default';
-                var pageX;
-                switch(event.type) {
-                    case "touchend":
-                        pageX = event.originalEvent.touches[0].pageX;
-                        break;
-                    case "mouseup":
-                        pageX = event.pageX;
-                        break;
-                    default:
-                        return;
-                }
+        }
 
-                var dragRatio = (pageX - dragX)/$(document).width();
-                musiki.pause();
-                tCursor.pause();
-                tCursor = T("param", {value:tCursor.value, ar:true}).on("ended", function() {
-                    musiki.pause();
-                }).sinTo(Math.clamp(tCursor.value + 3.*musiki.duration*dragRatio, 0., musiki.duration), musiki.duration*Math.abs(dragRatio));
-                musiki.set({currentTime:tCursor}).play();
+        function animate() {
 
-                animate();
-            });
+            requestAnimationFrame(animate);
 
-            function replay() {
-                tCursor = T("param", {value:musiki.duration, ar:true}).on("ended", function() {
-                    tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.).on("ended", function() {
-                        tCursor.sinTo(musiki.duration/4.*3., musiki.duration/3.);
-                    }).linTo(musiki.duration, musiki.duration);
-                }).sinTo(0., musiki.duration/5.);
-                musiki.set({currentTime:tCursor}).play();
+            controls.constraint.rotateLeft((controls.getAzimuthalAngle() - Math.PI / -360. * ((tCursor.value / musiki.duration * 120.) - 60.)));
+            controls.update();
 
-                animate();
+            render();
+
+        }
+
+        function render() {
+
+            camera.updateMatrixWorld();
+            renderer.render(scene, camera);
+
+            uniformsHeadshot['time'].value = 0.00025 * (Date.now() - start);
+
+        }
+
+        // https://gist.github.com/kujon/2781489
+        (function () { Math.clamp = function (a, b, c) { return Math.max(b, Math.min(c, a)); } })();
+
+        $("body").on('touchstart mousedown', function (event) {
+            document.body.style.cursor = 'col-resize';
+            var pageX;
+            switch (event.type) {
+                case "touchstart":
+                    pageX = event.originalEvent.touches[0].pageX;
+                    break;
+                case "mousedown":
+                    pageX = event.pageX;
+                    break;
+                default:
+                    return;
             }
 
-        </script>
-    </body>
+            dragX = pageX;
+            musiki.pause();
+        });
+        $("body").on('touchend mouseup', function (event) {
+            document.body.style.cursor = 'default';
+            var pageX;
+            switch (event.type) {
+                case "touchend":
+                    pageX = event.originalEvent.touches[0].pageX;
+                    break;
+                case "mouseup":
+                    pageX = event.pageX;
+                    break;
+                default:
+                    return;
+            }
+
+            var dragRatio = (pageX - dragX) / $(document).width();
+            musiki.pause();
+            tCursor.pause();
+            tCursor = T("param", { value: tCursor.value, ar: true }).on("ended", function () {
+                musiki.pause();
+            }).sinTo(Math.clamp(tCursor.value + 3. * musiki.duration * dragRatio, 0., musiki.duration), musiki.duration * Math.abs(dragRatio));
+            musiki.set({ currentTime: tCursor }).play();
+
+            animate();
+        });
+
+        function replay() {
+            tCursor = T("param", { value: musiki.duration, ar: true }).on("ended", function () {
+                tCursor.sinTo(musiki.duration / 4. * 3., musiki.duration / 3.).on("ended", function () {
+                    tCursor.sinTo(musiki.duration / 4. * 3., musiki.duration / 3.);
+                }).linTo(musiki.duration, musiki.duration);
+            }).sinTo(0., musiki.duration / 5.);
+            musiki.set({ currentTime: tCursor }).play();
+
+            animate();
+        }
+
+    </script>
+</body>
 
 </html>
