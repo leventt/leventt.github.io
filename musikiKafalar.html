@@ -131,7 +131,7 @@
 
                     // renderer
 
-                    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
+                    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialias: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
                     renderer.setSize(333, 333);
                     renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1)
                     container.appendChild(renderer.domElement);
