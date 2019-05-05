@@ -430,7 +430,7 @@ function init() {
     sphere.scale.set(1, 1, .1);
     scene.add(sphere);
 
-    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
+    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialias: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
     renderer.setSize(bsize, bsize);
     renderer.setPixelRatio(pratio);
     container.appendChild(renderer.domElement);

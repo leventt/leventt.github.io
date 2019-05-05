@@ -3,7 +3,7 @@ if (!Detector.webgl) Detector.addGetWebGLMessage();
 var renderer, scene, camera;
 var pratio = window.devicePixelRatio ? window.devicePixelRatio : 1;
 var bsize = 100;
-var pointSize = pratio;
+var pointSize = pratio * .75;
 var rotateY = new THREE.Matrix4().makeRotationY(0.01);
 var uniforms = {
     time:    { type: "f", value: 0.0 },
@@ -38,7 +38,7 @@ function generateDomeCloud() {
     var geometry = new THREE.BufferGeometry();
 
     var k = 0;
-    var pCount = 1024;
+    var pCount = 2048;
 
     var positions = new Float32Array(pCount * 3);
     var sizes = new Float32Array(pCount);
@@ -221,7 +221,14 @@ function generateDomeCloud() {
 
             void main() {
                 float ratio = dot(normalize(fV),normalize(fN));
-                gl_FragColor = mix(vec4(.5, .5, .5, 1), vec4((34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, (34.0 - fDisp) / 25.0, 1.0), pow(ratio, 1.5));
+                gl_FragColor = mix(
+                    vec4(.5, .5, .5, 1),
+                    vec4(
+                        vec3((34.0 - fDisp) / 25.0),
+                        1.0
+                    ),
+                    pow(clamp(ratio, 0., 1.), 1.5)
+                );
             }
         `,
     });
@@ -248,7 +255,7 @@ function init() {
     var sphere = new THREE.Mesh(geometry, material);
     scene.add(sphere);
 
-    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialiasing: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
+    renderer = Detector.webgl ? new THREE.WebGLRenderer({ alpha: true, antialias: true }) : new THREE.CanvasRenderer({ alpha: true, antialiasing: true });
     renderer.setSize(bsize, bsize);
     renderer.setPixelRatio(pratio);
     container.appendChild(renderer.domElement);
