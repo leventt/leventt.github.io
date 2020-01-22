@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <title>leventtasel.com</title>
+  <title>alaz</title>
+  
+  <link rel="shortcut icon" href="res/favicon.ico">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#cccccc">
+  <meta name="msapplication-navbutton-color" content="#cccccc">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#cccccc">
+  
+  <style>
+    @font-face { font-family: abastina; src: url('external/fonts/abastina.otf'); }
+    @font-face { font-family: josefin; src: url('external/fonts/josefin.ttf'); }
+    #logo {
+      font-family: abastina;
+      color: #5a5a5a;
+      font-size: 32px;
+      text-align: center;
+    }
+    #logotext {
+      width: 100px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    div.hiddenlogo {
+      display: none;
+    }
+    div.hiddencontent {
+      display: none;
+    }
+    div.hiddeninfo {
+      display: none;
+    }
+    a {
+      font-family: josefin;
+    }
+    a:link {
+      text-decoration: none;
+      color: #5c5c5c;
+    }
+    
+    a:visited {
+      text-decoration: none;
+      color: #5c5c5c;
+    }
+    
+    a:hover {
+      text-decoration: none;
+      color: #000;
+    }
+    
+    a:active {
+      text-decoration: none;
+      color: #5c5c5c;
+    }
+    body {
+      color: #000;
+      background-color: #cccccc;
+      margin: 0;
+      padding: none;
+    }
+    #content {
+      font-family: josefin;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+      text-align: center;
+    }
+    #nav {
+      font-family: josefin;
+      color: #5c5c5c;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+      text-align: center;
+    }
+    #footer {
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 30px;
+      text-align: center;
+    }
+    #outer {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .alaz { padding-right: 0; margin-left: auto; margin-right: auto; display: block; }
+    /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
+    canvas.alaz { border: 0px none; background-color: black; }
+  </style>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>alaz</title>
+  
+</head>
+<body>
+  
+  <canvas class="alaz" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+  <div id="logotext">
+    <div class="hiddenlogo" , id="logo">alaz</div>
+  </div>
+  
+  <div class="hiddencontent" , id="nav">
+    <a onclick="Module.requestFullscreen(true, true)" href="#">TOGGLE_FULLSCREEN</a>
+    <br>
+    [try connecting a controller]
+  </div>
+  
+  <script type='text/javascript'>
+    var Module = {
+      preRun: [],
+      postRun: [],
+      canvas: (function() {
+        var canvas = document.getElementById('canvas');
+        
+        // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+        // application robust, you may want to override this behavior before shipping!
+        // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+        canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+        
+        return canvas;
+      })()
+    };
+    
+    $(document).ready(function () {
+      $("div.hiddenlogo").fadeIn(1000).removeClass("hiddenlogo");
+      $("div.hiddencontent").fadeIn(5000).removeClass("hiddencontent");
+    });
+  </script>
+  <script async type="text/javascript" src="alaz.js"></script>
+</body>
+</html>
