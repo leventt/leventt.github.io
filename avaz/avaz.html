@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<head>
+    <title>avaz</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#9b9b9b">
+    <meta name="msapplication-navbutton-color" content="#9b9b9b">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#9b9b9b">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Sen&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+    <style>
+        body {
+            color: #9b9b9b;
+            background-color: #2b2b2b;
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        div {
+            font-family: 'Lato', sans-serif;
+            font-size: 13px;
+            color: #546a7b;
+        }
+
+        blockquote {
+            display: table;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 313px;
+        }
+
+        audio {
+            display: none;
+        }
+
+        table {
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        a {
+            color: #9b9b9b;
+            font-family: 'Lato', sans-serif;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .record {
+            color: #acacac;
+            font-family: 'Sen', sans-serif;
+            font-weight: bold;
+            font-size: 21px;
+        }
+
+        .pause {
+            color: #acacac;
+            font-family: 'Sen', sans-serif;
+            font-weight: bold;
+            font-size: 21px;
+        }
+
+        .resume {
+            color: #acacac;
+            font-family: 'Sen', sans-serif;
+            font-weight: bold;
+            font-size: 21px;
+        }
+
+        a:link {
+            text-decoration: none;
+            color: #9b9b9b;
+        }
+
+        a:visited {
+            text-decoration: none;
+            color: #9b9b9b;
+        }
+
+        a:hover {
+            text-decoration: none;
+            color: #f6e078;
+            cursor: pointer;
+        }
+
+        a:active {
+            text-decoration: none;
+            color: #9b9b9b;
+        }
+
+        .hiddenContent {
+            display: none;
+        }
+
+        #monitorRight {
+            font-family: 'Sen', sans-serif;
+            font-size: 5px;
+            color: #9b9b9b;
+        }
+
+        #monitorLeft {
+            font-family: 'Sen', sans-serif;
+            font-size: 5px;
+            color: #9b9b9b;
+        }
+
+        #status {
+            font-family: 'Lato', sans-serif;
+            font-size: 9px;
+            color: #9b9b9b;
+        }
+
+        #controls {
+            color: #9b9b9b;
+            font-family: 'Sen', sans-serif;
+            font-weight: bold;
+            font-size: 21px;
+        }
+
+        #canvas {
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <table style="display:flex;justify-content:center;align-items:center;">
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td>
+                        <td>
+                            <div class="hiddenContent">
+                                <canvas id="canvas"></canvas>
+                            </div>
+                        </td>
+            </td>
+        </tr>
+    </table>
+    </td>
+    </tr>
+    <tr>
+        <td>
+            <table>
+                <tr>
+                    <td>
+                        <div class="hiddenContent">
+                            <blockquote>
+                                <div id="controls" class="avaz"><a class="record">kaydet</a><br>[<a
+                                        class="record">record</a>]</div>
+                                <br>
+                                <table
+                                    style="width: 100%; margin-left: 0px; margin-right: 0; padding: 0; border-collapse: collapse;">
+                                    <tr>
+                                        <th style="text-align: end; padding: 0; margin: 0;">
+                                            <div id="monitorLeft">
+                                                ▒▒▒▒▒▒▒▒▒▒▒▒▒
+                                            </div>
+                                        </th>
+                                        <th style="text-align: start; padding: 0; margin: 0;">
+                                            <div id="monitorRight">
+                                                ▒▒▒▒▒▒▒▒▒▒▒▒▒
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </table>
+                            </blockquote>
+
+                            <blockquote>
+                                <div id="status"></div>
+                            </blockquote>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    </table>
+
+    <script src="meyda.min.js"></script>
+    <script src="ml-savitzky-golay-generalized.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js"
+        integrity="sha512-IMLquIKoKQeQ+kYuec3BvLYjy3yF2nH/ojHPkXQnQTeGKRliZcVed19I6E0t+WBt+9uPuEba0t2iyZAVP8mdlw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+        integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+    <script type="module">
+        import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js";
+        import { OrbitControls } from "./OrbitControls.js"
+        import { GLTFLoader } from "./GLTFLoader.js"
+
+        var avaz;
+
+        var isLooping = false;
+        var isProcessing = false;
+        var isIdle = true;
+        var isCountingDown = false;
+        var isRecording = false;
+
+        var loopSecs = 9;
+        var animFPS = 30;
+        var frameNum = 0;
+        var frameCount = Math.ceil(loopSecs * animFPS);
+
+        var lightShade = "░";
+        var midShade = "▒";
+        var darkShade = "▓";
+
+        var pulseEnabled = false;
+        var audioContext;
+        var recordedAudio
+        var mediaConstraints = { audio: true, video: false };
+
+        var canvasUnit = 256;
+        var container, scene, camera, renderer, composer;
+        var gltfScene, morphMesh;
+        var inferenceData;
+
+        var recordedAudioMark = 0;
+
+        var recordedFeatures = [];
+
+        function enablePulse() {
+            if (pulseEnabled) return;  // TODO
+            navigator.mediaDevices.getUserMedia(mediaConstraints).then((str) => {
+                audioContext = new window.AudioContext();
+                var analyser = audioContext.createAnalyser();
+                var stream = str;
+                var source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+
+                var analyzer = Meyda.createMeydaAnalyzer({
+                    "type": "audio",
+                    "audioContext": audioContext,
+                    "source": source,
+                    "inputs": 1,
+                    "sampleRate": 16000,
+                    "featureExtractors": ['mfcc'],
+                    "numberOfMFCCCoefficients": 32,
+                    "callback": features => {
+                        isIdle = false;
+                        if (isLooping || isProcessing) {
+                            return;
+                        } else if (isRecording) {
+                            recordedFeatures.push(features.mfcc);
+                            return;
+                        }
+                        var monitorRight = "";
+                        features.mfcc.slice(0, 13).forEach(e => {
+                            monitorRight += e < -.33 ? lightShade : (e < .33 ? midShade : darkShade);
+                        });
+                        document.getElementById('monitorRight').innerHTML = monitorRight;
+                        var monitorLeft = "";
+                        features.mfcc.slice(0, 13).reverse().forEach(e => {
+                            monitorLeft += e < -.33 ? lightShade : (e < .33 ? midShade : darkShade);
+                        });
+                        document.getElementById('monitorLeft').innerHTML = monitorLeft;
+                    }
+                });
+                analyzer.start();
+            });
+            pulseEnabled = true;
+        }
+
+        var countDownFrames = [
+            '▛&nbsp;▜<br>▙&nbsp;▟',
+            '▟&nbsp;▜<br>▙&nbsp;▛',
+            '▛&nbsp;▜<br>▙&nbsp;▟',
+            '▛&nbsp;▙<br>▜&nbsp;▟',
+        ];
+        var timeLeftFrames = [
+            'dört',
+            'üç',
+            'iki',
+            'bir',
+            'kaydediyor'
+        ];
+        var timeLeftFramesEng = [
+            'four',
+            'three',
+            'two',
+            'one',
+            'recording'
+        ];
+        function record() {
+            if (isRecording) return;
+            if (isLooping) return;
+            if (isProcessing) return;
+            enablePulse();
+            navigator.mediaDevices.getUserMedia({
+                video: false,
+                audio: true
+            }).then(async function (stream) {
+                var countDownFrame = 0;
+                var timeleft = 4;
+                var statusCountDown = setInterval(function () {
+                    isCountingDown = true;
+                    if (timeleft <= 0) {
+                        clearInterval(statusCountDown);
+                        isCountingDown = false;
+
+                        var recorder = new StereoAudioRecorder(stream, {
+                            type: 'audio',
+                            mimeType: 'audio/wav',
+                            numberOfAudioChannels: 1,
+                            desiredSampRate: 16000,
+                        });
+                        recorder.record();
+                        isRecording = true;
+                        recordedAudioMark = audioContext.currentTime;
+                        recordedFeatures = [];
+
+                        window.setTimeout(function () {
+                            recorder.stop(function () {
+                                isRecording = false;
+                                isProcessing = true;
+
+                                document.getElementById('controls').innerHTML = "bekliyor<br>[waiting]";
+
+                                var audioBlob = recorder.blob;
+                                var audioUrl = URL.createObjectURL(audioBlob);
+                                recordedAudio = new Audio(audioUrl);
+
+                                var paddingLen = recordedFeatures.length % 64;
+                                if (paddingLen > 32) {
+                                    paddingLen %= 32;
+                                } else {
+                                    paddingLen += 32;
+                                }
+                                var lastIndex = recordedFeatures.length - 1;
+                                for (var i = 0; i < paddingLen; i++) {
+                                    recordedFeatures.push(recordedFeatures[lastIndex]);
+                                }
+
+                                var inputFeatures = [];
+                                var sequenceRingBuffer = [];
+                                for (var i = 0; i < 32; i++) {
+                                    sequenceRingBuffer.push(recordedFeatures[0]);
+                                }
+                                recordedFeatures.forEach(mfcc => {
+                                    sequenceRingBuffer.push(mfcc);
+                                    if (sequenceRingBuffer.length == 64) {
+                                        inputFeatures.push(sequenceRingBuffer.slice(0));
+                                        sequenceRingBuffer.pop();
+                                    }
+                                });
+                                runInference(inputFeatures).then(function (output) {
+                                    inferenceData = output;
+
+                                    isLooping = true;
+                                    isProcessing = false;
+                                    recordedAudio.addEventListener('ended', function () {
+                                        this.currentTime = 0;
+                                        recordedAudioMark = audioContext.currentTime;
+                                        if (isLooping) this.play();
+                                    }, false);
+                                    recordedAudio.currentTime = 0;
+                                    recordedAudioMark = audioContext.currentTime;
+                                    recordedAudio.play();
+
+                                    function resume() {
+                                        isLooping = true;
+                                        recordedAudioMark = audioContext.currentTime - recordedAudio.currentTime;
+                                        recordedAudio.play();
+                                        document.getElementById('controls').innerHTML =
+                                            '<a class="pause">duraklat</a><br>[<a class="pause">pause</a>]';
+                                        $('a.pause').click(function (e) { e.preventDefault(); pause(); return false; });
+                                    }
+                                    function pause() {
+                                        isLooping = false;
+                                        recordedAudio.pause();
+                                        document.getElementById('controls').innerHTML =
+                                            '<a class="resume">devam et</a> ya da <a class="record">kaydet</a><br>[<a class="resume">resume</a> or <a class="record">record</a>]';
+                                        $('a.resume').click(function (e) { e.preventDefault(); resume(); return false; });
+                                        $('a.record').click(function (e) { e.preventDefault(); record(); return false; });
+                                    }
+                                    document.getElementById('controls').innerHTML =
+                                        '<a class="pause">duraklat</a><br>[<a class="pause">pause</a>]';
+                                    $('a.pause').click(function (e) { e.preventDefault(); pause(); return false; });
+                                });
+                            });
+                        }, 1000 * loopSecs);
+                    }
+
+                    countDownFrame = 4 - timeleft;
+
+                    document.getElementById("status").innerHTML = countDownFrames[countDownFrame];
+
+                    document.getElementById('controls').innerHTML =
+                        timeLeftFrames[countDownFrame] + "<br>[" + timeLeftFramesEng[countDownFrame] + "]";
+
+                    timeleft -= 1;
+
+                }, 1000);
+            });
+        }
+        $('a.record').click(function (e) { e.preventDefault(); record(); return false; });
+
+        var spinFrames = [
+            '&nbsp;▝&nbsp;<br>▙&nbsp;▗',
+            '&nbsp;▘&nbsp;<br>▖&nbsp;▟',
+            '▘&nbsp;▜<br>&nbsp;▖&nbsp;',
+            '▛&nbsp;▝<br>&nbsp;▗&nbsp;',
+        ];
+        function setSpin() {
+            if (isProcessing && audioContext != undefined) {
+                document.getElementById('status').innerHTML =
+                    spinFrames[Math.floor(((audioContext.currentTime) * (animFPS / 5.)) % spinFrames.length)];
+            } else if (!isCountingDown) {
+                document.getElementById('status').innerHTML = '▛&nbsp;▙<br>▜&nbsp;▟';
+            }
+        }
+
+        var pulseFrames = [
+            '▓▓▓▓▓▓▓▓▓▓▓▓▓',
+            '▒▒▒▒▒▒▒▒▒▒▒▒▒',
+            '░░░░░░░░░░░░░',
+            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+            '░░░░░░░░░░░░░',
+            '▒▒▒▒▒▒▒▒▒▒▒▒▒',
+            '▓▓▓▓▓▓▓▓▓▓▓▓▓',
+        ];
+        function setPulse() {
+            if (isLooping || isRecording) {
+                var monitorAudioPos = "";
+                var framePos = frameNum / (frameCount - 1);
+                var monitorLen = 13;
+                framePos *= monitorLen;
+                for (var i = 0; i < monitorLen; ++i) {
+                    var e = (i + 1) / (framePos * 3);
+                    monitorAudioPos += e < .33 ? lightShade : (e < .66 ? midShade : darkShade);
+                }
+
+                document.getElementById('monitorRight').innerHTML = monitorAudioPos;
+                document.getElementById('monitorLeft').innerHTML = monitorAudioPos.split("").reverse().join("");;
+
+                return;
+            }
+            else if ((isProcessing || isIdle) && audioContext != undefined) {
+                document.getElementById('monitorLeft').innerHTML = pulseFrames[0];
+                document.getElementById('monitorRight').innerHTML = pulseFrames[0];
+            }
+        }
+
+        async function runInference(inputFeatures) {
+            var averagedFeatures = [];
+            var step = Math.floor(inputFeatures.length / (animFPS * loopSecs));
+            for (var i = 0; i < loopSecs * animFPS; ++i) {
+                var chunk = inputFeatures.slice(i * step, i * step + step);
+                var averagedChunk = [];
+                for (var j = 0; j < chunk[0].length; ++j) {
+                    var averageCoeffs = Array(chunk[0][0].length).fill(0);
+                    for (var k = 0; k < chunk.length; ++k) {
+                        for (var m = 0; m < chunk[0][0].length; ++m) {
+                            averageCoeffs[m] += chunk[k][j][m];
+                        }
+                    }
+                    averageCoeffs.forEach(function (e, i) { averageCoeffs[i] /= chunk.length; });
+                    averagedChunk.push(averageCoeffs);
+                }
+                averagedFeatures.push(averagedChunk);
+            }
+            var dataFlat = new Float32Array(averagedFeatures.flat(2));
+            var inputTensor = new Tensor(dataFlat, "float32", [loopSecs * animFPS, 1, 64, 32]);
+            const output = await avaz.run([inputTensor]);
+            var inferenceOutput = output.values().next().value.data;
+            var framesOutput = [];
+            for (var i = 0; i < loopSecs * animFPS; ++i) {
+                framesOutput.push(inferenceOutput.slice(i * 9, i * 9 + 9));
+            }
+            var shapeFrames = _.unzip(framesOutput);  // transpose
+            var processedFrames = [];
+            var savGolOptions = {
+                windowSize: 7,
+                derivative: 0,
+                polynomial: 3,
+            };
+            var secondarySavGolOptions = {
+                windowSize: 13,
+                derivative: 0,
+                polynomial: 7,
+            };
+            shapeFrames.forEach(function (e) {
+                var vals = e || 0;  // cleanup NaNs
+                vals = SG(vals, (Math.PI * 2) / vals.length, savGolOptions);
+                var minVal = Math.min(...vals);
+                var maxVal = Math.max(...vals);
+                var range = Math.abs(maxVal - minVal);
+                // spring back to zero
+                var springedVals = vals.slice(0);
+                vals.forEach(function (e, i) {
+                    var prevIndex = Math.max(0, i - 1);
+                    if (Math.abs(vals[prevIndex] - e) < 0.01) {
+                        springedVals[i] = springedVals[prevIndex] * 0.61 - 0.23;
+                    }
+                });
+                springedVals = SG(springedVals, (Math.PI * 2) / springedVals.length, secondarySavGolOptions);
+                if (range < .001) {
+                    processedFrames.push(springedVals);
+                } else {
+                    processedFrames.push(springedVals.map(function (i) { return Math.min(1.0, Math.max(0.0, (i - minVal) / range)); }));
+                }
+            });
+            return processedFrames;
+        }
+
+        function setMorphTargets() {
+            if (!inferenceData) return;
+            if (!morphMesh) return;
+            for (var i = 0; i < inferenceData.length; i++) {
+                morphMesh.morphTargetInfluences[i] = inferenceData[i][frameNum];
+            }
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2b2b2b);
+            camera = new THREE.PerspectiveCamera(18, canvasUnit / canvasUnit, 0.01, 100);
+            camera.position.set(0.0, 1.0, 8.0);
+
+            scene.add(new THREE.HemisphereLight(0x443333, 0x222233, 0.9));
+            const light = new THREE.DirectionalLight(0xffffff, 0.1, 100);
+            light.position.set(0, 1, 0.1);
+            light.castShadow = true;
+            scene.add(light);
+            light.shadow.mapSize.width = 512;
+            light.shadow.mapSize.height = 512;
+            light.shadow.camera.near = 0.5;
+            light.shadow.camera.far = 50;
+
+            var gltfEyeMaterial = new THREE.MeshBasicMaterial({ color: 0xf6e078 });
+            new GLTFLoader().load('./mouth.glb', function (gltf) {
+                gltfScene = gltf.scene;
+                scene.add(gltfScene);
+                gltfScene.traverse(function (mesh) {
+                    if (mesh.isMesh) {
+                        mesh.castShadow = true;
+                        mesh.receiveShadow = true;
+                        mesh.material.metalness = 0.0;
+                        mesh.material.metalnessMap = null;
+                        mesh.material.roughness = 0.73;
+                        if (mesh.morphTargetInfluences) {
+                            morphMesh = mesh;
+                            morphMesh.material.morphTargets = true;
+                            morphMesh.updateMorphTargets();
+                            for (var i = 0; i < morphMesh.morphTargetInfluences.length; i++) {
+                                morphMesh.morphTargetInfluences[i] = 0.0;
+                            }
+                        }
+                    }
+                });
+            });
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: document.getElementById('canvas') });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(canvasUnit, canvasUnit);
+
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            renderer.toneMappingExposure = 3;
+
+            var controls = new OrbitControls(camera, renderer.domElement);
+            controls.maxPolarAngle = Math.PI * 0.61;
+            controls.minPolarAngle = Math.PI * 0.34;
+            controls.maxAzimuthAngle = Math.PI * 0.23;
+            controls.minAzimuthAngle = Math.PI * -0.23;
+            controls.enablePan = false;
+            controls.enableZoom = false;
+            controls.target = new THREE.Vector3(0, 0, 0);
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function onWindowResize() {
+            camera.aspect = canvasUnit / canvasUnit;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(canvasUnit, canvasUnit);
+        }
+
+        function animate() {
+            setTimeout(function () {
+                requestAnimationFrame(animate);
+            }, 1000 / (animFPS * 3));
+
+            if (audioContext != undefined && (isLooping || isRecording)) {
+                frameNum =
+                    Math.floor((audioContext.currentTime - recordedAudioMark) * animFPS);
+                if (frameNum >= frameCount) frameNum = frameNum % frameCount;
+            }
+
+            if (isLooping) {
+                setMorphTargets();
+            }
+
+            setSpin();
+            setPulse();
+
+            render();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        $(document).ready(function () {
+            avaz = new onnx.InferenceSession();
+            avaz.loadModel("./avaz.onnx").then(() => {
+                $(".hiddenContent").fadeIn(5000).removeClass("hiddenContent");
+                init();
+                animate();
+            });
+        });
+
+    </script>
+</body>
+
+</html>
