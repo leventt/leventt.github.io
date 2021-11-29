@@ -1,11 +1,20 @@
-@font-face { font-family: abastina; src: url('external/fonts/abastina.otf'); }
-@font-face { font-family: josefin; src: url('external/fonts/josefin.ttf'); }
+@font-face {
+    font-family: abastina;
+    src: url('external/fonts/abastina.otf');
+}
+
+@font-face {
+    font-family: josefin;
+    src: url('external/fonts/josefin.ttf');
+}
+
 #logo {
     font-family: abastina;
     color: #6B6B6B;
     font-size: 32px;
     text-align: center;
 }
+
 #logotext {
     width: 100px;
     margin-left: auto;
@@ -13,18 +22,23 @@
     margin-top: 30px;
     margin-bottom: 20px;
 }
+
 div.hiddenlogo {
     display: none;
 }
+
 div.hiddencontent {
     display: none;
 }
+
 div.hiddeninfo {
     display: none;
 }
+
 a {
     font-family: josefin;
 }
+
 a:link {
     text-decoration: none;
     color: #6A6A6A;
@@ -44,10 +58,12 @@ a:active {
     text-decoration: none;
     color: #6A6A6A;
 }
+
 body {
     color: #000;
     background-color: #ccc;
 }
+
 #content {
     font-family: josefin;
     width: 100%;
@@ -56,6 +72,7 @@ body {
     margin-top: 30px;
     text-align: center;
 }
+
 #nav {
     font-family: josefin;
     color: #6A6A6A;
@@ -64,6 +81,7 @@ body {
     margin-top: 30px;
     text-align: center;
 }
+
 #footer {
     width: 100%;
     margin-left: auto;
@@ -71,10 +89,12 @@ body {
     margin-top: 30px;
     text-align: center;
 }
+
 #outer {
     width: 100%;
     text-align: center;
 }
+
 #loading {
     display: inline-block;
     font-family: josefin;
@@ -83,13 +103,15 @@ body {
     margin-right: auto;
     text-align: center;
 }
+
 #canvas {
     display: inline-block;
     font-family: josefin;
 }
+
 blockquote {
     border-left: 0.5em solid #6A6A6A;
-	border-right: 0.5em solid #6A6A6A;
+    border-right: 0.5em solid #6A6A6A;
     width: 333px;
     margin-left: auto;
     margin-right: auto;
