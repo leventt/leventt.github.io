@@ -242,7 +242,7 @@
 
         function enablePulse() {
             if (pulseEnabled) return;  // TODO
-            navigator.mediaDevices.getUserMedia(mediaConstraints).then((str) => {
+            window.navigator.mediaDevices.getUserMedia(mediaConstraints).then((str) => {
                 audioContext = new window.AudioContext();
                 var analyser = audioContext.createAnalyser();
                 var stream = str;
@@ -307,7 +307,7 @@
             if (isLooping) return;
             if (isProcessing) return;
             enablePulse();
-            navigator.mediaDevices.getUserMedia({
+            window.navigator.mediaDevices.getUserMedia({
                 video: false,
                 audio: true
             }).then(async function (stream) {
@@ -502,7 +502,7 @@
             };
             shapeFrames.forEach(function (e) {
                 var vals = e || 0;  // cleanup NaNs
-                vals = SG(vals, (Math.PI * 2) / vals.length, savGolOptions);
+                vals = window.SG(vals, (Math.PI * 2) / vals.length, savGolOptions);
                 var minVal = Math.min(...vals);
                 var maxVal = Math.max(...vals);
                 var range = Math.abs(maxVal - minVal);
@@ -514,7 +514,7 @@
                         springedVals[i] = springedVals[prevIndex] * 0.61 - 0.23;
                     }
                 });
-                springedVals = SG(springedVals, (Math.PI * 2) / springedVals.length, secondarySavGolOptions);
+                springedVals = window.SG(springedVals, (Math.PI * 2) / springedVals.length, secondarySavGolOptions);
                 if (range < .001) {
                     processedFrames.push(springedVals);
                 } else {
