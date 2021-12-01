@@ -500,25 +500,38 @@
                 derivative: 0,
                 polynomial: 4,
             };
-            shapeFrames.forEach(function (e) {
+            shapeFrames.forEach(function (e, n) {
                 var vals = e || 0;  // cleanup NaNs
                 vals = window.SG(vals, (Math.PI * 2) / vals.length, savGolOptions);
                 var minVal = Math.min(...vals);
                 var maxVal = Math.max(...vals);
                 var range = Math.abs(maxVal - minVal);
-                // spring back to zero
+                if (n < 1) {   // drop jaw shape is the forst one
+                    // spring back to zero
+                    var springedVals = vals.slice(0);
+                    vals.forEach(function (e, i) {
+                        var prevIndex = Math.max(0, i - 1);
+                        if (Math.abs(vals[prevIndex] - e) < 0.023) {
+                            springedVals[i] = springedVals[prevIndex] * 0.61 - 0.23;
+                        }
+                    });
+                    vals = springedVals;
+                }
+                // spring back the rest of the shapes less aggresively to zero
                 var springedVals = vals.slice(0);
                 vals.forEach(function (e, i) {
                     var prevIndex = Math.max(0, i - 1);
                     if (Math.abs(vals[prevIndex] - e) < 0.01) {
-                        springedVals[i] = springedVals[prevIndex] * 0.61 - 0.23;
+                        springedVals[i] = springedVals[prevIndex] * 0.81 - 0.13;
                     }
                 });
-                springedVals = window.SG(springedVals, (Math.PI * 2) / springedVals.length, secondarySavGolOptions);
+                vals = springedVals;
+
+                vals = window.SG(vals, (Math.PI * 2) / vals.length, secondarySavGolOptions);
                 if (range < .001) {
-                    processedFrames.push(springedVals);
+                    processedFrames.push(vals);
                 } else {
-                    processedFrames.push(springedVals.map(function (i) { return Math.min(1.0, Math.max(0.0, (i - minVal) / range)); }));
+                    processedFrames.push(vals.map(function (i) { return Math.min(1.0, Math.max(0.0, (i - minVal) / range)); }));
                 }
             });
             return processedFrames;
