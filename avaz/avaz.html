@@ -498,7 +498,7 @@
             var secondarySavGolOptions = {
                 windowSize: 13,
                 derivative: 0,
-                polynomial: 4,
+                polynomial: 5,
             };
             shapeFrames.forEach(function (e, n) {
                 var vals = e || 0;  // cleanup NaNs
@@ -506,7 +506,7 @@
                 var minVal = Math.min(...vals);
                 var maxVal = Math.max(...vals);
                 var range = Math.abs(maxVal - minVal);
-                if (n < 1) {   // drop jaw shape is the forst one
+                if (n < 2) {   // drop jaw shapes are the first two
                     // spring back to zero
                     var springedVals = vals.slice(0);
                     vals.forEach(function (e, i) {
@@ -521,8 +521,8 @@
                 var springedVals = vals.slice(0);
                 vals.forEach(function (e, i) {
                     var prevIndex = Math.max(0, i - 1);
-                    if (Math.abs(vals[prevIndex] - e) < 0.01) {
-                        springedVals[i] = springedVals[prevIndex] * 0.81 - 0.13;
+                    if (Math.abs(vals[prevIndex] - e) < 0.023) {
+                        springedVals[i] = springedVals[prevIndex] * 0.96 - 0.13;
                     }
                 });
                 vals = springedVals;
