@@ -228,8 +228,8 @@
 
         var pulseEnabled = false;
         var audioContext;
-        var recordedAudio
-        var mediaConstraints = { audio: true, video: false };
+        var recordedAudio;
+        var recordedAudioSetupDone = false;
 
         var canvasUnit = 256;
         var container, scene, camera, renderer, composer;
@@ -242,7 +242,7 @@
 
         function enablePulse() {
             if (pulseEnabled) return;  // TODO
-            window.navigator.mediaDevices.getUserMedia(mediaConstraints).then((str) => {
+            window.navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then((str) => {
                 audioContext = new window.AudioContext();
                 var analyser = audioContext.createAnalyser();
                 var stream = str;
@@ -339,7 +339,13 @@
 
                                 var audioBlob = recorder.blob;
                                 var audioUrl = URL.createObjectURL(audioBlob);
-                                recordedAudio = new Audio(audioUrl);
+                                if (recordedAudioSetupDone) {
+                                    recordedAudio.src = audioUrl;
+                                    recordedAudio.autoplay = false;
+                                } else {
+                                    recordedAudio = new Audio(audioUrl);
+                                    recordedAudioSetupDone = true;
+                                }
 
                                 var paddingLen = recordedFeatures.length % 64;
                                 if (paddingLen > 32) {
@@ -414,7 +420,18 @@
                 }, 1000);
             });
         }
-        $('a.record').click(function (e) { e.preventDefault(); record(); return false; });
+        $('a.record').click(function (e) {
+            if (!recordedAudioSetupDone) {
+                recordedAudioSetupDone = true;
+                recordedAudio = new Audio();
+                recordedAudio.autoplay = true;
+                // ref: https://stackoverflow.com/questions/31776548/why-cant-javascript-play-audio-files-on-iphone-safari
+                recordedAudio.src = "data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
+            }
+            e.preventDefault();
+            record();
+            return false;
+        });
 
         var spinFrames = [
             '&nbsp;▝&nbsp;<br>▙&nbsp;▗',
