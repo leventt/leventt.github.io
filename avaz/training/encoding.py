@@ -64,9 +64,9 @@ def fast_hash(ind: torch.Tensor, primes: torch.Tensor, hashmap_size: int):
     https://github.com/NVlabs/tiny-cuda-nn/blob/master/include/tiny-cuda-nn/encodings/grid.h#L76-L92
     """
     d = ind.shape[-1]
-    ind = (ind * primes[:d]) & 0xFFFFFFFF  # uint32
+    ind = (ind * primes[:d]).int()
     for i in range(1, d):
-        ind[..., 0] ^= ind[..., i]
+        ind[..., 0] = torch.logical_xor(ind[..., 0], ind[..., i])
     return ind[..., 0] % hashmap_size
 
 

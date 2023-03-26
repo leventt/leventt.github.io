@@ -201,7 +201,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
         integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
     <script type="text/javascript"
         src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
     <script type="module">
@@ -498,9 +498,9 @@
                 averagedFeatures.push(averagedChunk);
             }
             var dataFlat = new Float32Array(averagedFeatures.flat(2));
-            var inputTensor = new Tensor(dataFlat, "float32", [loopSecs * animFPS, 1, 64, 32]);
-            const output = await avaz.run([inputTensor]);
-            var inferenceOutput = output.values().next().value.data;
+            var inputTensor = new ort.Tensor("float32", dataFlat, [loopSecs * animFPS, 1, 64, 32]);
+            const output = await avaz.run({"input.1": inputTensor});
+            var inferenceOutput = output["82"].data;
             var framesOutput = [];
             for (var i = 0; i < loopSecs * animFPS; ++i) {
                 framesOutput.push(inferenceOutput.slice(i * 9, i * 9 + 9));
@@ -653,14 +653,10 @@
             renderer.render(scene, camera);
         }
 
-        $(document).ready(function () {
-            avaz = new onnx.InferenceSession();
-            avaz.loadModel("./avaz.onnx").then(() => {
-                $(".hiddenContent").fadeIn(5000).removeClass("hiddenContent");
-                init();
-                animate();
-            });
-        });
+        avaz = await ort.InferenceSession.create('./avaz.onnx');
+        $(".hiddenContent").fadeIn(5000).removeClass("hiddenContent");
+        init();
+        animate();
 
     </script>
 </body>
