@@ -529,7 +529,7 @@
                     vals.forEach(function (e, i) {
                         var prevIndex = Math.max(0, i - 1);
                         if (Math.abs(vals[prevIndex] - e) < 0.023) {
-                            springedVals[i] = springedVals[prevIndex] * 0.61 - 0.23;
+                            springedVals[i] = springedVals[prevIndex] * 0.61 - 0.13;
                         }
                     });
                     vals = springedVals;
@@ -558,7 +558,7 @@
             if (!inferenceData) return;
             if (!morphMesh) return;
             for (var i = 0; i < inferenceData.length; i++) {
-                morphMesh.morphTargetInfluences[i] = inferenceData[i][frameNum];
+                morphMesh.morphTargetInfluences[i] = inferenceData[i][frameNum - 15];
             }
         }
 

@@ -30,5 +30,7 @@ if __name__ == "__main__":
         tracedScript,
         (torch.zeros((270, 1, AUDIOSEQ_LEN, EXTRACTOR_LEN))),
         os.path.join(ROOT, "avaz.onnx"),
-        opset_version=18,  # latest at the time of writing
+        opset_version=17,
+        input_names=["input"],
+        output_names=["output"],
     )
