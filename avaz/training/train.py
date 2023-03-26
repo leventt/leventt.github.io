@@ -46,10 +46,10 @@ def loop(batchSize, learningRate, model, dataSet, scheduler=False, epochCount=10
     if not os.path.exists(modelDir):
         os.makedirs(modelDir)
 
-    # validationAudioPath = os.path.join(ROOT, "data", "validation.wav")
-    # validationAudioFeatures = getAudioFeatures(validationAudioPath)[: FPS * 4]
-    # validationMatcap = Image.open(os.path.join(ROOT, "data", "matcap.png"))
-    # trainingAudioFeatures = dataSet.inputSpeechFeatures[: FPS * 4]
+    validationAudioPath = os.path.join(ROOT, "data", "validation.wav")
+    validationAudioFeatures = getAudioFeatures(validationAudioPath)[: FPS * 4]
+    validationMatcap = Image.open(os.path.join(ROOT, "data", "matcap.png"))
+    trainingAudioFeatures = dataSet.inputSpeechFeatures[: FPS * 4]
 
     print("start: {}".format(datetime.now()))
     start = datetime.now()
@@ -93,24 +93,24 @@ def loop(batchSize, learningRate, model, dataSet, scheduler=False, epochCount=10
                 model,
                 os.path.join(modelDir, "{}_E{:05d}.pth".format(runStr, epochIdx + 1)),
             )
-            # model.eval()  # for normalization and regularization et
-            # logWriter.add_video(
-            #     "validation",
-            #     getValidationVideoTensor(
-            #         getInference(model, validationAudioFeatures), validationMatcap,
-            #     ),
-            #     epochIdx + 1,
-            #     fps=30,
-            # )
-            # logWriter.add_video(
-            #     "training",
-            #     getValidationVideoTensor(
-            #         getInference(model, trainingAudioFeatures), validationMatcap,
-            #     ),
-            #     epochIdx + 1,
-            #     fps=30,
-            # )
-            # model.train()  # don't forget to recover
+            model.eval()  # for normalization and regularization etc.
+            logWriter.add_video(
+                "validation",
+                getValidationVideoTensor(
+                    getInference(model, validationAudioFeatures), validationMatcap,
+                ),
+                epochIdx + 1,
+                fps=30,
+            )
+            logWriter.add_video(
+                "training",
+                getValidationVideoTensor(
+                    getInference(model, trainingAudioFeatures), validationMatcap,
+                ),
+                epochIdx + 1,
+                fps=30,
+            )
+            model.train()  # don't forget to recover
         if scheduler:
             scheduler.step()
 
