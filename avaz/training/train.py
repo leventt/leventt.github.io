@@ -94,22 +94,22 @@ def loop(batchSize, learningRate, model, dataSet, scheduler=False, epochCount=10
                     model,
                     os.path.join(modelDir, "{}_E{:09d}.pth".format(runStr, epochIdx + 1)),
                 )
-                # logWriter.add_video(
-                #     "validation",
-                #     getValidationVideoTensor(
-                #         getInference(model, validationAudioFeatures), validationMatcap,
-                #     ),
-                #     epochIdx + 1,
-                #     fps=30,
-                # )
-                # logWriter.add_video(
-                #     "training",
-                #     getValidationVideoTensor(
-                #         getInference(model, trainingAudioFeatures), validationMatcap,
-                #     ),
-                #     epochIdx + 1,
-                #     fps=30,
-                # )
+                logWriter.add_video(
+                    "validation",
+                    getValidationVideoTensor(
+                        getInference(model, validationAudioFeatures), validationMatcap,
+                    ),
+                    epochIdx + 1,
+                    fps=30,
+                )
+                logWriter.add_video(
+                    "training",
+                    getValidationVideoTensor(
+                        getInference(model, trainingAudioFeatures), validationMatcap,
+                    ),
+                    epochIdx + 1,
+                    fps=30,
+                )
         if scheduler:
             scheduler.step()
 

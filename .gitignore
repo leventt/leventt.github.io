@@ -3,3 +3,4 @@ __pycache__
 .idea
 avaz/training/logs
 avaz/training/model
+*.pyc
