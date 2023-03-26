@@ -51,7 +51,14 @@ class Model(nn.Module):
             nn.Conv2d(FORMANT_LEN, FORMANT_LEN, (4, 1), (4, 1), (1, 0), 1,),
         )
         self.output = nn.Sequential(
-            nn.Linear(FORMANT_LEN, SHAPES_LEN), nn.Linear(SHAPES_LEN, SHAPES_LEN),
+            nn.Linear(FORMANT_LEN, 512),
+            nn.LeakyReLU(),
+            nn.Linear(512, 512),
+            nn.LeakyReLU(),
+            nn.Linear(512, 512),
+            nn.LeakyReLU(),
+            nn.Linear(512, SHAPES_LEN),
+            nn.Sigmoid(),
         )
 
     def forward(self, inp):
@@ -60,6 +67,6 @@ class Model(nn.Module):
         # out.shape = [BATCH_SIZE, FORMANT_LEN, AUDIO_SEQLEN, 1]
         out = self.articulation(out)
         # out.shape = [BATCH_SIZE, FORMANT_LEN, 1, 1]
-        out = self.output(out.squeeze(3).squeeze(2))
+        out = self.output(out.view(-1, FORMANT_LEN))
         # out.shape = [BATCH_SIZE, SHAPES_LEN]
         return out.view(-1, SHAPES_LEN)

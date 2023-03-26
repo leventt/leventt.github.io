@@ -10,10 +10,7 @@ from constants import EXTRACTOR_LEN
 if __name__ == "__main__":
     DEVICE = torch.device("cpu")
 
-    # MODEL_CP_PATH = os.path.join(ROOT, "model", "*", "*.pth")
-    MODEL_CP_PATH = os.path.join(
-        ROOT, "model", "*", "*E130000.pth"
-    )  # TODO: natural sorting bug
+    MODEL_CP_PATH = os.path.join(ROOT, "model", "*", "*.pth")
     MODEL_CP_PATH = glob.glob(MODEL_CP_PATH)[-1]
     print(MODEL_CP_PATH)
 
@@ -29,9 +26,9 @@ if __name__ == "__main__":
 
     tracedScript.save(os.path.join(ROOT, "avaz.pt"))
 
-    # torch.onnx.export(
-    #     model,
-    #     (torch.zeros((270, 1, AUDIOSEQ_LEN, EXTRACTOR_LEN))),
-    #     os.path.join(ROOT, "demo", "avaz.onnx"),
-    #     opset_version=11,
-    # )
+    torch.onnx.export(
+        model,
+        (torch.zeros((270, 1, AUDIOSEQ_LEN, EXTRACTOR_LEN))),
+        os.path.join(ROOT, "avaz.onnx"),
+        opset_version=13,  # latest at the time of writing
+    )

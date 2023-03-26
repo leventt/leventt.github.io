@@ -1,5 +1,4 @@
 import os
-from typing import Any
 import numpy as np
 import torch
 import torchaudio
@@ -14,14 +13,14 @@ from constants import EXTRACTOR_LEN
 from constants import ROOT
 from constants import DEVICE
 from constants import FPS
-from constants import SHAPES_LEN
 
 
 def getAudioFeatures(path, expectedFrameCount=None):
     waveform, sampleRate = torchaudio.load(path)
     if sampleRate != SAMPLE_RATE:
         waveform = torchaudio.transforms.Resample(sampleRate, SAMPLE_RATE)(waveform)
-        sampleRate = SAMPLE_RATE
+        sampleRate = SAMPLE_RATE  # just in case, this may be used later
+
     if expectedFrameCount is not None:
         waveform = torch.from_numpy(
             resample_ndsignal(

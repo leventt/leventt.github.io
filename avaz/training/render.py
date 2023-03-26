@@ -32,7 +32,7 @@ class Camera:
         self.far = 100.0
         self.theta = np.pi / 2.0
         self.phi = np.pi / 2.0
-        self.radius = 10.0
+        self.radius = 50.0
         self.upsign = 1.0
         self.target = np.array([0.0, 0.0, 0.0], np.float32)
         self.orbit(math.radians(-25), math.radians(0))
@@ -271,11 +271,11 @@ if __name__ == "__main__":
     TRACED_SCRIPT = None
     TRACED_SCRIPT = torch.jit.load(TRACED_SCRIPT_PATH)
     TRACED_SCRIPT.eval()
-    audioFeatures = getAudioFeatures(os.path.join(ROOT, "data", "empty.wav")).to(DEVICE)
-    # PreviewWindow.inference = getInference(TRACED_SCRIPT, audioFeatures)
+    audioFeatures = getAudioFeatures(os.path.join(ROOT, "data", "validation.wav")).to(DEVICE)
     PreviewWindow.inference = (
         torch.zeros(audioFeatures.shape[0], SHAPES_LEN).detach().cpu().numpy()
     )
+    PreviewWindow.inference = getInference(TRACED_SCRIPT, audioFeatures)
     print(NEUTRAL_VERTS.shape)
     print(NEUTRAL_VERTS.max())
     print(NEUTRAL_VERTS.min())

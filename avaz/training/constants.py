@@ -1,5 +1,4 @@
 import os
-import math
 import torch
 import numpy as np
 
@@ -128,3 +127,10 @@ MESH_INDICES = np.load(os.path.join(ROOT, "data", "indices.npy"))
 NEUTRAL_VERTS = np.load(os.path.join(ROOT, "data", "neutral.npy"))
 # (19, 886, 3) we only need first 9 shapes
 DELTA_VERTS = np.load(os.path.join(ROOT, "data", "deltas.npy"))[:9]
+# z up to y up
+t = NEUTRAL_VERTS[..., 1].copy()
+NEUTRAL_VERTS[..., 1] = NEUTRAL_VERTS[..., 2]
+NEUTRAL_VERTS[..., 2] = -1 * t
+t = DELTA_VERTS[..., 1].copy()
+DELTA_VERTS[..., 1] = DELTA_VERTS[..., 2]
+DELTA_VERTS[..., 2] = -1 * t
