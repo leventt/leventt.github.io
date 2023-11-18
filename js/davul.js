@@ -49,6 +49,8 @@ function schedule() {
 }
 
 function setup() {
+    getAudioContext().resume()
+
     var canvas = createCanvas(window.innerWidth, window.innerHeight)
     canvas.parent("davulContainer")
 
@@ -205,6 +207,8 @@ function draw() {
 }
 
 function mouseClicked() {
+    getAudioContext().resume()
+
     var dx = (width / 2) - mouseX
     var dy = (height / 2) - mouseY
     var clickR = dist(width / 2, height / 2, mouseX, mouseY)
