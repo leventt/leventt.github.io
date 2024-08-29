@@ -2,7 +2,7 @@ var fftSteps = 128
 var fft = new Tone.FFT(fftSteps).toMaster()
 
 var player = new Tone.Player('res/simetrik/triplet.m4a').connect(fft)
-player.autostart = true
+player.autostart = false
 player.loop = true
 
 function setup() {
