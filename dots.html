@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>dots</title>
+
+    <link rel="shortcut icon" href="res/favicon.ico">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="theme-color" content="#888888">
+    <meta name="msapplication-navbutton-color" content="#888888">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#888888">
+
+    <script src="gifuct-bundle.js"></script>
+    <style>
+        @font-face {
+            font-family: josefin;
+            src: url('external/fonts/josefin.ttf');
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: josefin;
+            background-color: #ccc;
+            color: #6A6A6A;
+            padding: 0;
+            margin: 0;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 30px;
+            color: #6B6B6B;
+        }
+
+        .canvas-container {
+            margin: 20px auto;
+        }
+
+        canvas {
+            border: none;
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            width: 280px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #6A6A6A;
+            text-align: center;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 2px;
+            background: #6A6A6A;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #6A6A6A;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #000;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #6A6A6A;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #000;
+        }
+
+        .value-display {
+            min-width: 45px;
+            text-align: right;
+            font-size: 14px;
+            color: #6A6A6A;
+        }
+
+        button,
+        .file-label {
+            display: inline-block;
+            padding: 8px 16px;
+            background: none;
+            color: #6A6A6A;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            transition: color 0.3s ease;
+        }
+
+        button:hover,
+        .file-label:hover {
+            color: #000;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            text-align: center;
+        }
+
+        .info {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #6A6A6A;
+            text-align: center;
+        }
+
+        .error {
+            color: #6A6A6A;
+            font-size: 14px;
+            margin: 30px auto;
+            display: none;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .controls {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="error" class="error"></div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="432" height="243"></canvas>
+            <div class="info" id="sourceLink" style="margin-top: 5px;">
+                <a href="https://www.behance.net/gallery/108679717/Shadow-animation-practice/modules/622713299"
+                    target="_blank"
+                    style="color: #6A6A6A; transition: color 0.3s; text-decoration: none; font-size: 12px;"
+                    onmouseover="this.style.color='#000'" onmouseout="this.style.color='#6A6A6A'">animation by
+                    numsiri q</a>
+                &
+                <a href="https://github.com/mwkm/atoMeow" target="_blank"
+                    style="color: #6A6A6A; transition: color 0.3s; text-decoration: none; font-size: 12px;"
+                    onmouseover="this.style.color='#000'" onmouseout="this.style.color='#6A6A6A'">algorithm by
+                    mike wong</a>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="file" id="fileInput" accept="image/*">
+            <label for="fileInput" class="file-label">load image / gif</label>
+
+            <div class="control-group">
+                <label>dots</label>
+                <div class="slider-container">
+                    <input type="range" id="dotsSlider" min="512" max="16384" value="8192" step="256">
+                    <span class="value-display" id="dotsValue">8192</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>charge</label>
+                <div class="slider-container">
+                    <input type="range" id="chargeSlider" min="1" max="100" value="13">
+                    <span class="value-display" id="chargeValue">0.13</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>size</label>
+                <div class="slider-container">
+                    <input type="range" id="sizeSlider" min="1" max="4" value="1">
+                    <span class="value-display" id="sizeValue">1</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>mod</label>
+                <div class="slider-container">
+                    <input type="range" id="modulationSlider" min="0" max="100" value="34">
+                    <span class="value-display" id="modulationValue">34%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dots.js">
+    </script>
+
+</html>
